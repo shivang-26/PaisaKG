@@ -137,19 +137,19 @@ export const FamilyManagerView: React.FC = () => {
 
       {/* Family Card Banner */}
       {currentFamily && (
-        <div className="p-6 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+        <div className="p-6 rounded-[24px] bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#16A34A] text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-green-100 dark:shadow-none">
+              <div className="w-12 h-12 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center font-bold text-xl shadow-md">
                 <Building2 className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                <h2 className="text-lg font-bold text-[#0d1f15]">
                   {currentFamily.name}
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <p className="text-xs text-slate-600 font-medium">
                   Monthly Budget:{' '}
-                  <span className="font-bold text-slate-800 dark:text-slate-200">
+                  <span className="font-bold text-[#0d1f15]">
                     {formatAmount(currentFamily.monthlyBudget || 75000, currentFamily.currency)}
                   </span>
                 </p>
@@ -163,7 +163,7 @@ export const FamilyManagerView: React.FC = () => {
                   setEditBudget(currentFamily.monthlyBudget || 75000);
                   setShowEditFamilyModal(true);
                 }}
-                className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1 shadow-sm"
+                className="px-3 py-1.5 rounded-xl bg-white border border-[#d5dbcb] text-[#0a452b] text-xs font-semibold hover:bg-[#e5e9d3] transition-colors flex items-center gap-1 shadow-sm"
               >
                 <Edit2 className="w-3.5 h-3.5" /> Edit
               </button>
@@ -171,27 +171,27 @@ export const FamilyManagerView: React.FC = () => {
           </div>
 
           {/* Unique Invite Code Banner */}
-          <div className="p-4 rounded-2xl bg-green-50/70 dark:bg-emerald-950/40 border border-green-200/60 dark:border-emerald-900 flex items-center justify-between gap-2">
+          <div className="p-4 rounded-2xl bg-[#e5e9d3] border border-[#d5dbcb] flex items-center justify-between gap-2">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-green-800 dark:text-emerald-400">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#0a452b]">
                 Family Invite Code
               </p>
-              <p className="text-base font-bold tracking-widest font-mono text-slate-900 dark:text-white">
+              <p className="text-base font-bold tracking-widest font-mono text-[#0d1f15]">
                 {currentFamily.inviteCode}
               </p>
             </div>
 
             <button
               onClick={handleCopyCode}
-              className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-xs font-bold hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm"
+              className="px-3 py-1.5 rounded-xl bg-[#0a452b] text-white border border-[#07331f] text-xs font-bold hover:bg-[#07331f] transition-colors flex items-center gap-1.5 shadow-sm"
             >
               {copiedCode ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-[#16A34A]" /> Copied!
+                  <Check className="w-3.5 h-3.5 text-emerald-300" /> Copied!
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5 text-slate-400" /> Copy Code
+                  <Copy className="w-3.5 h-3.5 text-white" /> Copy Code
                 </>
               )}
             </button>

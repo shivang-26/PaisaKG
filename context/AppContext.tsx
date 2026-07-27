@@ -78,7 +78,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   });
 
-  // Monitor network status
+  // Monitor network status & Supabase auth changes
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
@@ -92,11 +92,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         document.documentElement.classList.remove('dark');
       }
+
+      // Register SW
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch((e) => console.log('SW Error:', e));
+      }
+    }
+
+    // Subscribe to Supabase Auth state changes (Magic link redirects, OAuth, etc.)
+    const supabase = getSupabaseClient();
+    let authSubscription: any = null;
+
+    if (supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user?.email) {
+          const userEmail = session.user.email;
+          const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
+          verifyOtp(userEmail, 'magiclink', userFullName);
+        }
+      });
+
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user?.email) {
+          const userEmail = session.user.email;
+          const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
+          verifyOtp(userEmail, 'magiclink', userFullName);
+        }
+      });
+      authSubscription = data.subscription;
     }
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
   }, []);
 

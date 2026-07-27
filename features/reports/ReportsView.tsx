@@ -126,17 +126,17 @@ export const ReportsView: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-xl font-extrabold text-[#0d1f15] tracking-tight">
             Family Spending Reports
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-xs text-slate-600 font-medium">
             Analytics & Export for {currentFamily?.name || 'Workspace'}
           </p>
         </div>
 
         <button
           onClick={() => exportExpensesCSV(expenses, currentFamily?.name || 'Family')}
-          className="px-4 py-2.5 rounded-xl bg-[#16A34A] hover:bg-green-700 text-white text-xs font-semibold shadow-lg shadow-green-100 dark:shadow-none transition-all flex items-center gap-2"
+          className="px-4 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-semibold shadow-md transition-all flex items-center gap-2"
         >
           <Download className="w-3.5 h-3.5" />
           Export CSV
@@ -145,38 +145,38 @@ export const ReportsView: React.FC = () => {
 
       {/* Summary Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="p-5 rounded-[24px] bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm">
+          <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             Total Spent
           </p>
-          <p className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mt-1">
+          <p className="text-lg sm:text-2xl font-bold text-[#0d1f15] mt-1">
             {formatAmount(totalSpent, currentFamily?.currency || '₹')}
           </p>
-          <p className="text-[10px] text-[#16A34A] font-semibold mt-1">
+          <p className="text-[10px] text-[#0a452b] font-semibold mt-1">
             This Month
           </p>
         </div>
 
-        <div className="p-5 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="p-5 rounded-[24px] bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm">
+          <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             No. of Expenses
           </p>
-          <p className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mt-1">
+          <p className="text-lg sm:text-2xl font-bold text-[#0d1f15] mt-1">
             {expenseCount}
           </p>
-          <p className="text-[10px] text-slate-400 font-semibold mt-1">
+          <p className="text-[10px] text-slate-500 font-semibold mt-1">
             Logged entries
           </p>
         </div>
 
-        <div className="p-5 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="p-5 rounded-[24px] bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm">
+          <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             Average Expense
           </p>
-          <p className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mt-1">
+          <p className="text-lg sm:text-2xl font-bold text-[#0d1f15] mt-1">
             {formatAmount(avgExpense, currentFamily?.currency || '₹')}
           </p>
-          <p className="text-[10px] text-slate-400 font-semibold mt-1">
+          <p className="text-[10px] text-slate-500 font-semibold mt-1">
             Per transaction
           </p>
         </div>

@@ -151,12 +151,12 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-xl font-extrabold text-[#0d1f15] tracking-tight">
             Family Expense Records
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-xs text-slate-600 font-medium">
             Showing {filteredExpenses.length} expenses • Total:{' '}
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">
+            <span className="font-bold text-[#0a452b]">
               {formatAmount(totalFilteredAmount, currentFamily?.currency || '₹')}
             </span>
           </p>
@@ -165,13 +165,13 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={onOpenScanModal}
-            className="px-4 py-2.5 rounded-xl bg-[#16A34A] hover:bg-green-700 text-white text-xs font-semibold shadow-lg shadow-green-100 dark:shadow-none transition-all flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-semibold shadow-md transition-all flex items-center gap-2"
           >
             <Sparkles className="w-3.5 h-3.5" /> Scan Receipt
           </button>
           <button
             onClick={onOpenAddModal}
-            className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-1.5 shadow-sm"
+            className="px-4 py-2.5 rounded-xl bg-[#f2f5e8] border border-[#d5dbcb] text-[#0a452b] text-xs font-semibold hover:bg-white transition-all flex items-center gap-1.5 shadow-sm"
           >
             <Plus className="w-3.5 h-3.5" /> Add
           </button>
@@ -187,7 +187,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search merchant, notes, member..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full pl-9 pr-3 py-2 text-xs bg-[#f2f5e8] border border-[#d5dbcb] rounded-2xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
           />
           {searchQuery && (
             <button
@@ -203,8 +203,8 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
           onClick={() => setShowFilters(!showFilters)}
           className={`px-3 py-2 rounded-2xl border text-xs font-bold flex items-center gap-1.5 transition-colors ${
             showFilters || selectedCategory !== 'ALL' || selectedMember !== 'ALL'
-              ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
-              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+              ? 'bg-[#0a452b] text-white border-[#07331f]'
+              : 'bg-[#f2f5e8] border-[#d5dbcb] text-[#0d1f15]'
           }`}
         >
           <Filter className="w-3.5 h-3.5" />
@@ -214,17 +214,17 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
 
       {/* Expandable Filter Drawer */}
       {showFilters && (
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3 animate-in fade-in duration-150">
+        <div className="p-4 bg-[#f2f5e8] rounded-3xl border border-[#d5dbcb] space-y-3 animate-in fade-in duration-150">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Category filter */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">
                 Category
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15]"
               >
                 <option value="ALL">All Categories</option>
                 {Object.values(CATEGORIES).map((cat) => (
@@ -237,13 +237,13 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
 
             {/* Member filter */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">
                 Family Member
               </label>
               <select
                 value={selectedMember}
                 onChange={(e) => setSelectedMember(e.target.value)}
-                className="w-full px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15]"
               >
                 <option value="ALL">All Family Members</option>
                 {familyMembers.map((m) => (
@@ -262,7 +262,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   setSelectedMember('ALL');
                   setSearchQuery('');
                 }}
-                className="w-full py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-900 transition-colors"
+                className="w-full py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-50 rounded-xl border border-rose-200 transition-colors"
               >
                 Reset All Filters
               </button>
@@ -282,7 +282,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
               <div
                 key={expense.id}
                 onClick={() => onSelectExpense(expense)}
-                className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 shadow-sm transition-all cursor-pointer flex items-center justify-between gap-3 group"
+                className="p-3.5 rounded-2xl bg-[#f2f5e8] border border-[#d5dbcb] hover:border-[#0a452b] shadow-sm transition-all cursor-pointer flex items-center justify-between gap-3 group"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div
@@ -294,17 +294,17 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      <p className="text-xs font-bold text-[#0d1f15] truncate">
                         {expense.merchant}
                       </p>
                       {expense.receiptImage && (
-                        <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px]" title="Receipt photo attached">
-                          <FileText className="w-3 h-3 text-emerald-600" />
+                        <span className="p-1 rounded bg-[#e5e9d3] text-[#0a452b] text-[10px]" title="Receipt photo attached">
+                          <FileText className="w-3 h-3 text-[#0a452b]" />
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    <p className="text-[11px] text-slate-600 flex items-center gap-1.5 mt-0.5">
+                      <span className="font-semibold text-slate-800">
                         {expense.createdByName}
                       </span>
                       <span>•</span>
@@ -314,7 +314,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                 </div>
 
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-extrabold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <p className="text-sm font-extrabold text-[#0d1f15] group-hover:text-[#0a452b] transition-colors">
                     {formatAmount(expense.amount, expense.currency)}
                   </p>
                   <span className="inline-block text-[10px] font-semibold text-slate-500 dark:text-slate-400">

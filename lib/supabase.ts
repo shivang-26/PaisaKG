@@ -37,14 +37,19 @@ export function getSupabaseClient(): SupabaseClient | null {
 export async function sendSupabaseOtp(email: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return { success: false, error: 'Supabase client is not configured. Please provide Supabase keys.' };
+    return { success: false, error: 'Supabase client is not configured. Please check Supabase credentials.' };
   }
 
   try {
+    const currentOrigin = typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://paisa-kg.vercel.app';
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}` : undefined,
+        emailRedirectTo: currentOrigin,
+        shouldCreateUser: true,
       },
     });
 

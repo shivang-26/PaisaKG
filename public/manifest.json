@@ -1,22 +1,22 @@
 {
-  "short_name": "Family Expense",
-  "name": "Family Expense Tracker PWA",
+  "short_name": "PaisaKG",
+  "name": "PaisaKG Family Expense Tracker",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/familyicon192/192/192",
+      "src": "https://picsum.photos/seed/paisaicon192/192/192",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://picsum.photos/seed/familyicon512/512/512",
+      "src": "https://picsum.photos/seed/paisaicon512/512/512",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": "/",
-  "background_color": "#0F172A",
-  "theme_color": "#16A34A",
+  "background_color": "#e5e9d3",
+  "theme_color": "#0a452b",
   "display": "standalone",
   "orientation": "portrait",
-  "description": "Shared mobile-first family expense tracker with receipt OCR scanning"
+  "description": "Real-time family expense tracker with receipt OCR scanning"
 }

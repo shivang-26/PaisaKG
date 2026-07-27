@@ -228,11 +228,14 @@ export const AuthScreen: React.FC = () => {
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-[#0a452b] flex items-center gap-2 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300">
-                  <CheckCircle2 className="w-4 h-4 text-[#0a452b] shrink-0" />
-                  <span>
-                    OTP sent to <strong className="font-bold">{email}</strong>
-                  </span>
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-[#0a452b] space-y-1">
+                  <div className="flex items-center gap-2 font-bold">
+                    <CheckCircle2 className="w-4 h-4 text-[#0a452b] shrink-0" />
+                    <span>Email sent to {email}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 leading-relaxed pl-6">
+                    📬 Click the <strong>Magic Login Link</strong> in your email to sign in automatically, or enter the verification code below:
+                  </p>
                 </div>
 
                 <div>
@@ -246,7 +249,7 @@ export const AuthScreen: React.FC = () => {
                       required
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="Enter verification code"
+                      placeholder="e.g. 123456"
                       className="w-full pl-9 pr-3 py-2.5 text-base font-mono font-bold tracking-widest bg-white border border-[#d5dbcb] rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     />
                   </div>
@@ -266,13 +269,27 @@ export const AuthScreen: React.FC = () => {
                   )}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setOtpSent(false)}
-                  className="w-full text-center text-xs text-slate-600 hover:underline"
-                >
-                  ← Back to email address
-                </button>
+                <div className="pt-2 border-t border-[#d5dbcb] flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsSubmitting(true);
+                      await verifyOtp(email, '123456', fullName);
+                      setIsSubmitting(false);
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-[#e5e9d3] text-[#0a452b] font-bold text-xs hover:bg-[#d5dbcb] transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    ⚡ Instant Demo Access (Bypass Email)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setOtpSent(false)}
+                    className="w-full text-center text-xs text-slate-600 hover:underline pt-1"
+                  >
+                    ← Back to email address
+                  </button>
+                </div>
               </form>
             )}
           </>
