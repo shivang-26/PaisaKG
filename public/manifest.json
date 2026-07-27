@@ -1,0 +1,22 @@
+{
+  "short_name": "Family Expense",
+  "name": "Family Expense Tracker PWA",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/familyicon192/192/192",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://picsum.photos/seed/familyicon512/512/512",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0F172A",
+  "theme_color": "#16A34A",
+  "display": "standalone",
+  "orientation": "portrait",
+  "description": "Shared mobile-first family expense tracker with receipt OCR scanning"
+}

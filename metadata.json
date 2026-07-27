@@ -1,0 +1,6 @@
+{
+  "name": "PaisaKG",
+  "description": "Real-time family expense tracker and financial management app with receipt scanning and cloud auth.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
