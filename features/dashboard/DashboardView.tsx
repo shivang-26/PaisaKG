@@ -8,6 +8,7 @@ import { Expense } from '@/lib/types';
 import { formatAmount, formatDate } from '@/lib/utils';
 import {
   ScanLine,
+  Upload,
   PlusCircle,
   Receipt,
   TrendingUp,
@@ -118,12 +119,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
-            id="dashboard-header-scan-btn"
+            id="dashboard-header-upload-btn"
             onClick={onOpenScanModal}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#f2f5e8] border border-[#d5dbcb] px-4 py-2.5 rounded-xl text-sm font-semibold text-[#0a452b] shadow-sm hover:bg-white transition-colors"
           >
-            <ScanLine className="w-4 h-4 text-[#0a452b]" />
-            Scan Receipt
+            <Upload className="w-4 h-4 text-[#0a452b]" />
+            Upload Receipt
           </button>
           <button
             id="dashboard-header-add-btn"
@@ -180,6 +181,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {familyMembers.length} active contributors
           </p>
         </div>
+      </div>
+
+      {/* Upload Receipt Banner */}
+      <div
+        id="dashboard-upload-receipt-card"
+        onClick={onOpenScanModal}
+        className="bg-gradient-to-r from-[#0a452b] via-[#0e5234] to-[#0a452b] p-5 sm:p-6 rounded-[24px] text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer hover:shadow-lg transition-all group border border-[#0d1f15]/20"
+      >
+        <div className="flex items-center gap-4 text-center sm:text-left">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <Upload className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-extrabold flex items-center justify-center sm:justify-start gap-2">
+              Upload Receipt Image <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+            </h3>
+            <p className="text-xs sm:text-sm text-emerald-100/90 mt-0.5">
+              Select or drop receipt files to auto-extract store, date, total amount & line items using AI.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenScanModal();
+          }}
+          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white text-[#0a452b] font-extrabold text-xs sm:text-sm shadow-sm hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2 shrink-0"
+        >
+          <Upload className="w-4 h-4" />
+          Upload Receipt
+        </button>
       </div>
 
       {/* Recent Expenses & Category Grid */}
@@ -242,12 +274,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <div className="p-8 text-center bg-[#e5e9d3]/50 rounded-2xl border border-[#d5dbcb]">
                 <Receipt className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                 <p className="text-sm font-bold text-[#0d1f15]">No expenses recorded yet</p>
-                <p className="text-xs text-slate-600 mb-4">Start by scanning a receipt or logging manually.</p>
+                <p className="text-xs text-slate-600 mb-4">Start by uploading a receipt or logging manually.</p>
                 <button
                   onClick={onOpenScanModal}
                   className="px-4 py-2 rounded-xl bg-[#0a452b] text-white text-xs font-bold shadow-sm hover:bg-[#07331f]"
                 >
-                  Scan First Receipt
+                  Upload First Receipt
                 </button>
               </div>
             )}

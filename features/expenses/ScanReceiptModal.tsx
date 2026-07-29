@@ -50,7 +50,18 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   const [items, setItems] = useState<OCRItemResult[]>([]);
   const [showEnlargedImage, setShowEnlargedImage] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto trigger camera when modal opens in upload step
+  React.useEffect(() => {
+    if (isOpen && step === 'upload' && !selectedImage) {
+      const timer = setTimeout(() => {
+        cameraInputRef.current?.click();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, step, selectedImage]);
 
   if (!isOpen) return null;
 
@@ -206,28 +217,50 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
           {/* STEP 1: UPLOAD / CAMERA */}
           {step === 'upload' && (
             <div className="space-y-4">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#0a452b]/40 hover:border-[#0a452b] bg-[#e5e9d3] rounded-3xl p-8 text-center cursor-pointer transition-all hover:scale-[0.99] group"
-              >
-                <div className="w-16 h-16 rounded-full bg-[#0a452b] text-white flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <div className="border-2 border-dashed border-[#0a452b]/40 bg-[#e5e9d3] rounded-3xl p-6 sm:p-8 text-center transition-all">
+                <div className="w-16 h-16 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center mx-auto mb-3 shadow-md">
                   <Camera className="w-8 h-8" />
                 </div>
-                <h3 className="text-sm font-bold text-[#0d1f15] mb-1">
-                  Upload or Snap Receipt
+                <h3 className="text-base font-bold text-[#0d1f15] mb-1">
+                  Snap or Upload Receipt
                 </h3>
-                <p className="text-xs text-slate-600 max-w-xs mx-auto mb-4">
-                  Tap to capture with camera or choose image from gallery (JPG, PNG)
+                <p className="text-xs text-slate-600 max-w-xs mx-auto mb-5">
+                  Opening camera to scan your receipt directly, or choose a picture from your gallery.
                 </p>
-                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-md transition-all">
-                  <Upload className="w-4 h-4" />
-                  Select Image
-                </span>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    <Camera className="w-4 h-4" />
+                    Open Camera (Snap)
+                  </button>
+
+                  <button
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white hover:bg-slate-50 text-[#0d1f15] text-xs font-bold border border-[#d5dbcb] shadow-sm transition-all flex items-center justify-center gap-2"
+                  >
+                    <Upload className="w-4 h-4 text-[#0a452b]" />
+                    Upload from Gallery
+                  </button>
+                </div>
+
+                {/* Hidden input for Camera capture */}
                 <input
-                  ref={fileInputRef}
+                  ref={cameraInputRef}
                   type="file"
                   accept="image/*"
                   capture="environment"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+
+                {/* Hidden input for Gallery file selection */}
+                <input
+                  ref={galleryInputRef}
+                  type="file"
+                  accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
                 />

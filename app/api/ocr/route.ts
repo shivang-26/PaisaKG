@@ -39,54 +39,90 @@ If a detail is uncertain, provide your best estimation and reflect low confidenc
 Ensure category matches one of: Groceries, Food, Fuel, Medical, Shopping, Utilities, Education, Travel, Entertainment, Others.
 Date must be in YYYY-MM-DD format. Total amount must be a number.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              data: cleanBase64,
-              mimeType: mimeType,
-            },
+    const contentsPayload = {
+      parts: [
+        {
+          inlineData: {
+            data: cleanBase64,
+            mimeType: mimeType,
           },
-          {
-            text: prompt,
+        },
+        {
+          text: prompt,
+        },
+      ],
+    };
+
+    const configPayload = {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          merchant: { type: Type.STRING, description: 'Store or merchant name' },
+          totalAmount: { type: Type.NUMBER, description: 'Total paid amount' },
+          date: { type: Type.STRING, description: 'Receipt date YYYY-MM-DD' },
+          category: {
+            type: Type.STRING,
+            description: 'One of Groceries, Food, Fuel, Medical, Shopping, Utilities, Education, Travel, Entertainment, Others',
           },
-        ],
-      },
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            merchant: { type: Type.STRING, description: 'Store or merchant name' },
-            totalAmount: { type: Type.NUMBER, description: 'Total paid amount' },
-            date: { type: Type.STRING, description: 'Receipt date YYYY-MM-DD' },
-            category: {
-              type: Type.STRING,
-              description: 'One of Groceries, Food, Fuel, Medical, Shopping, Utilities, Education, Travel, Entertainment, Others',
-            },
-            tax: { type: Type.NUMBER, description: 'Tax amount if present' },
-            receiptNumber: { type: Type.STRING, description: 'Receipt invoice or ticket number' },
-            confidenceScore: { type: Type.NUMBER, description: 'Confidence level from 0 to 100' },
-            confidenceNotes: { type: Type.STRING, description: 'Notes on low confidence or missing fields' },
+          tax: { type: Type.NUMBER, description: 'Tax amount if present' },
+          receiptNumber: { type: Type.STRING, description: 'Receipt invoice or ticket number' },
+          confidenceScore: { type: Type.NUMBER, description: 'Confidence level from 0 to 100' },
+          confidenceNotes: { type: Type.STRING, description: 'Notes on low confidence or missing fields' },
+          items: {
+            type: Type.ARRAY,
+            description: 'List of individual items on receipt',
             items: {
-              type: Type.ARRAY,
-              description: 'List of individual items on receipt',
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  name: { type: Type.STRING },
-                  qty: { type: Type.NUMBER },
-                  price: { type: Type.NUMBER },
-                },
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                qty: { type: Type.NUMBER },
+                price: { type: Type.NUMBER },
               },
             },
           },
-          required: ['merchant', 'totalAmount', 'date', 'category', 'confidenceScore'],
         },
+        required: ['merchant', 'totalAmount', 'date', 'category', 'confidenceScore'],
       },
-    });
+    };
+
+    // Try primary model gemini-3.6-flash, fallback to gemini-3.1-pro-preview if high demand / 503
+    const candidateModels = ['gemini-3.6-flash', 'gemini-3.1-pro-preview'];
+    let response: any = null;
+    let lastError: any = null;
+
+    for (const modelName of candidateModels) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          response = await ai.models.generateContent({
+            model: modelName,
+            contents: contentsPayload,
+            config: configPayload,
+          });
+          if (response) break;
+        } catch (err: any) {
+          lastError = err;
+          const errMsg = err.message || JSON.stringify(err) || '';
+          const isRetryable =
+            errMsg.includes('503') ||
+            errMsg.includes('UNAVAILABLE') ||
+            errMsg.includes('high demand') ||
+            errMsg.includes('429') ||
+            errMsg.includes('RESOURCE_EXHAUSTED');
+
+          if (isRetryable && attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
+            continue;
+          }
+          break; // Move to next model if available
+        }
+      }
+      if (response) break;
+    }
+
+    if (!response) {
+      throw lastError || new Error('All AI vision models are currently experiencing high demand. Please try again shortly.');
+    }
 
     const jsonText = response.text || '{}';
     const parsedData = JSON.parse(jsonText);
