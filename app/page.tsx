@@ -23,7 +23,7 @@ function MainApp() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#e5e9d3] dark:bg-slate-950 text-slate-900 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#e5e9d3] text-[#0d1f15] flex flex-col items-center justify-center p-4">
         <div className="w-14 h-14 rounded-2xl bg-[#0a452b] flex items-center justify-center text-white text-2xl font-bold shadow-md animate-pulse mb-3">
           ₹
         </div>
@@ -40,7 +40,7 @@ function MainApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#e5e9d3] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors">
+    <div className="min-h-screen bg-[#e5e9d3] text-[#0d1f15] font-sans transition-colors">
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 min-h-[calc(100vh-4rem-4rem)]">

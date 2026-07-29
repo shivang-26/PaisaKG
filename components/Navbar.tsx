@@ -31,7 +31,7 @@ export const Navbar: React.FC = () => {
   const [showMemberMenu, setShowMemberMenu] = useState(false);
 
   return (
-    <header id="app-header" className="sticky top-0 z-30 bg-[#f2f5e8]/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#d5dbcb] dark:border-slate-800 transition-colors">
+    <header id="app-header" className="sticky top-0 z-30 bg-[#f2f5e8]/95 backdrop-blur-md border-b border-[#d5dbcb] transition-colors">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
         {/* Logo and App Title */}
         <div className="flex items-center gap-3">
@@ -42,7 +42,7 @@ export const Navbar: React.FC = () => {
           >
             <Logo size="md" showText={true} />
             {currentFamily && (
-              <span className="hidden md:inline-block text-xs font-semibold text-slate-500 dark:text-slate-400 pl-2 border-l border-slate-200 dark:border-slate-700">
+              <span className="hidden md:inline-block text-xs font-semibold text-slate-600 pl-2 border-l border-[#d5dbcb]">
                 {currentFamily.name}
               </span>
             )}
@@ -55,32 +55,21 @@ export const Navbar: React.FC = () => {
           {isOffline ? (
             <div
               id="offline-status-badge"
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-200 dark:border-amber-800"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold border border-amber-200"
               title="Working Offline. Changes saved locally."
             >
-              <WifiOff className="w-3.5 h-3.5 animate-pulse" />
+              <WifiOff className="w-3.5 h-3.5 animate-pulse text-amber-700" />
               <span className="hidden sm:inline">Offline</span>
             </div>
           ) : syncQueueCount > 0 ? (
             <div
               id="sync-status-badge"
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 text-xs font-semibold border border-blue-200 dark:border-blue-800"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-[#0a452b] text-xs font-semibold border border-emerald-200"
             >
               <Wifi className="w-3.5 h-3.5 animate-spin" />
               <span className="text-[11px]">{syncQueueCount} syncing</span>
             </div>
           ) : null}
-
-          {/* Dark mode toggle */}
-          <button
-            id="theme-toggle-btn"
-            onClick={toggleDarkMode}
-            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Toggle theme"
-            aria-label="Toggle theme"
-          >
-            {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5" />}
-          </button>
 
           {/* Member Persona Switcher */}
           {currentUser && (
@@ -88,30 +77,30 @@ export const Navbar: React.FC = () => {
               <button
                 id="user-persona-btn"
                 onClick={() => setShowMemberMenu(!showMemberMenu)}
-                className="flex items-center gap-2 p-1.5 pl-2 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-2 p-1.5 pl-2 pr-2.5 rounded-xl border border-[#d5dbcb] bg-white hover:bg-[#e5e9d3] transition-colors shadow-sm"
               >
                 <img
                   src={currentUser.avatarUrl || 'https://picsum.photos/100'}
                   alt={currentUser.fullName}
-                  className="w-7 h-7 rounded-full object-cover ring-2 ring-emerald-500/30"
+                  className="w-7 h-7 rounded-full object-cover ring-2 ring-[#0a452b]/30"
                 />
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 hidden md:inline">
+                <span className="text-xs font-bold text-[#0d1f15] hidden md:inline">
                   {currentUser.fullName.split(' ')[0]}
                 </span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
               </button>
 
               {/* Persona Dropdown */}
               {showMemberMenu && (
                 <div
                   id="user-persona-dropdown"
-                  className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                  className="absolute right-0 mt-2 w-64 bg-[#f2f5e8] rounded-2xl shadow-xl border border-[#d5dbcb] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
                 >
-                  <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="px-3 py-2 border-b border-[#d5dbcb]">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
                       Switch Family Member
                     </p>
-                    <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
+                    <p className="text-xs font-bold text-[#0d1f15] truncate">
                       Active: {currentUser.fullName}
                     </p>
                   </div>
@@ -124,8 +113,8 @@ export const Navbar: React.FC = () => {
                           switchActiveUser(m.userId);
                           setShowMemberMenu(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${
-                          m.userId === currentUser.id ? 'bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-slate-700 dark:text-slate-300'
+                        className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#e5e9d3] transition-colors ${
+                          m.userId === currentUser.id ? 'bg-[#e5e9d3] text-[#0a452b] font-bold' : 'text-[#0d1f15]'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
@@ -135,26 +124,26 @@ export const Navbar: React.FC = () => {
                             className="w-7 h-7 rounded-full object-cover"
                           />
                           <div>
-                            <p className="text-xs font-medium leading-tight">{m.fullName}</p>
-                            <p className="text-[10px] text-slate-400">{m.role}</p>
+                            <p className="text-xs font-semibold leading-tight">{m.fullName}</p>
+                            <p className="text-[10px] text-slate-500">{m.role}</p>
                           </div>
                         </div>
                         {m.userId === currentUser.id && (
-                          <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <UserCheck className="w-4 h-4 text-[#0a452b]" />
                         )}
                       </button>
                     ))}
                   </div>
 
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1 px-2">
+                  <div className="border-t border-[#d5dbcb] pt-1 mt-1 px-2">
                     <button
                       onClick={() => {
                         setActiveTab('family');
                         setShowMemberMenu(false);
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-[#0a452b] hover:bg-[#e5e9d3] rounded-xl transition-colors"
                     >
-                      <Users className="w-4 h-4 text-slate-400" />
+                      <Users className="w-4 h-4 text-[#0a452b]" />
                       Manage Family Workspace
                     </button>
                   </div>

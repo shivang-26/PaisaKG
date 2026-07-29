@@ -47,7 +47,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenScanModal }) => {
   ];
 
   return (
-    <nav id="app-bottom-nav" className="fixed bottom-0 left-0 right-0 z-30 bg-[#f2f5e8]/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-[#d5dbcb] dark:border-slate-800 pb-safe transition-colors">
+    <nav id="app-bottom-nav" className="fixed bottom-0 left-0 right-0 z-30 bg-[#f2f5e8]/95 backdrop-blur-lg border-t border-[#d5dbcb] pb-safe transition-colors">
       <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-around">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -59,7 +59,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenScanModal }) => {
                 <button
                   id="bottom-nav-scan-btn"
                   onClick={onOpenScanModal}
-                  className="w-14 h-14 rounded-full bg-[#0a452b] text-white flex flex-col items-center justify-center shadow-lg hover:bg-[#07331f] hover:scale-105 active:scale-95 transition-all ring-4 ring-[#e5e9d3] dark:ring-slate-900"
+                  className="w-14 h-14 rounded-full bg-[#0a452b] text-white flex flex-col items-center justify-center shadow-lg hover:bg-[#07331f] hover:scale-105 active:scale-95 transition-all ring-4 ring-[#e5e9d3]"
                   aria-label="Scan Receipt"
                 >
                   <ScanLine className="w-5 h-5 animate-pulse" />
@@ -76,8 +76,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenScanModal }) => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
                 isActive
-                  ? 'text-[#0a452b] dark:text-emerald-400 font-bold scale-105'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium'
+                  ? 'text-[#0a452b] font-bold scale-105'
+                  : 'text-slate-600 hover:text-[#0d1f15] font-medium'
               }`}
             >
               <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />

@@ -317,7 +317,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   <p className="text-sm font-extrabold text-[#0d1f15] group-hover:text-[#0a452b] transition-colors">
                     {formatAmount(expense.amount, expense.currency)}
                   </p>
-                  <span className="inline-block text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                  <span className="inline-block text-[10px] font-semibold text-slate-500">
                     {expense.category}
                   </span>
                 </div>
@@ -326,12 +326,12 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
           })}
         </div>
       ) : (
-        <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3">
-          <Receipt className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+        <div className="p-12 text-center bg-[#f2f5e8] rounded-3xl border border-[#d5dbcb] space-y-3">
+          <Receipt className="w-12 h-12 text-slate-400 mx-auto" />
+          <h3 className="text-sm font-bold text-[#0d1f15]">
             No expenses found
           </h3>
-          <p className="text-xs text-slate-400 max-w-xs mx-auto">
+          <p className="text-xs text-slate-500 max-w-xs mx-auto">
             Try adjusting search terms or filters to find family expenses.
           </p>
         </div>
@@ -339,19 +339,19 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
 
       {/* EXPENSE DETAIL & EDIT LIGHTBOX MODAL */}
       {selectedExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-[#f2f5e8] rounded-3xl shadow-2xl border border-[#d5dbcb] w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-[#d5dbcb] bg-[#e5e9d3] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400">
+                <div className="p-2 rounded-xl bg-[#0a452b] text-white">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-base font-bold text-[#0d1f15]">
                     {isEditing ? 'Edit Expense' : 'Expense Details'}
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-600">
                     ID: {selectedExpense.id}
                   </p>
                 </div>
@@ -361,7 +361,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   onSelectExpense(null);
                   setIsEditing(false);
                 }}
-                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-1.5 rounded-full text-slate-500 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/50 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -373,37 +373,37 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                 /* EDIT FORM */
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Merchant
                     </label>
                     <input
                       type="text"
                       value={editMerchant}
                       onChange={(e) => setEditMerchant(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Amount (₹)
                     </label>
                     <input
                       type="number"
                       value={editAmount}
                       onChange={(e) => setEditAmount(Number(e.target.value))}
-                      className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Category
                     </label>
                     <select
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value as ExpenseCategoryKey)}
-                      className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     >
                       {Object.values(CATEGORIES).map((cat) => (
                         <option key={cat.key} value={cat.key}>
@@ -414,78 +414,78 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Date
                     </label>
                     <input
                       type="date"
                       value={editDate}
                       onChange={(e) => setEditDate(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
                       Notes
                     </label>
                     <input
                       type="text"
                       value={editNotes}
                       onChange={(e) => setEditNotes(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     />
                   </div>
                 </div>
               ) : (
                 /* VIEW DISPLAY */
                 <div className="space-y-4">
-                  <div className="text-center p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900">
-                    <p className="text-xs uppercase font-bold text-emerald-800 dark:text-emerald-400">
+                  <div className="text-center p-4 rounded-2xl bg-[#e5e9d3] border border-[#d5dbcb]">
+                    <p className="text-xs uppercase font-bold text-[#0a452b]">
                       Amount Paid
                     </p>
-                    <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">
+                    <p className="text-3xl font-black text-[#0d1f15] mt-1">
                       {formatAmount(selectedExpense.amount, selectedExpense.currency)}
                     </p>
-                    <span className="inline-block px-3 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold mt-2">
+                    <span className="inline-block px-3 py-0.5 rounded-full bg-[#0a452b] text-white text-[11px] font-bold mt-2">
                       {selectedExpense.category}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
-                      <p className="text-slate-400 font-medium">Merchant</p>
-                      <p className="font-bold text-slate-900 dark:text-white mt-0.5">
+                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
+                      <p className="text-slate-500 font-medium">Merchant</p>
+                      <p className="font-bold text-[#0d1f15] mt-0.5">
                         {selectedExpense.merchant}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
-                      <p className="text-slate-400 font-medium">Date</p>
-                      <p className="font-bold text-slate-900 dark:text-white mt-0.5">
+                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
+                      <p className="text-slate-500 font-medium">Date</p>
+                      <p className="font-bold text-[#0d1f15] mt-0.5">
                         {formatDate(selectedExpense.expenseDate)}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
-                      <p className="text-slate-400 font-medium">Paid By</p>
-                      <p className="font-bold text-slate-900 dark:text-white mt-0.5">
+                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
+                      <p className="text-slate-500 font-medium">Paid By</p>
+                      <p className="font-bold text-[#0d1f15] mt-0.5">
                         {selectedExpense.createdByName}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
-                      <p className="text-slate-400 font-medium">Sync Status</p>
-                      <p className="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
+                      <p className="text-slate-500 font-medium">Sync Status</p>
+                      <p className="font-bold text-[#0a452b] mt-0.5">
                         {selectedExpense.synced ? 'Synced to Cloud' : 'Saved Offline'}
                       </p>
                     </div>
                   </div>
 
                   {selectedExpense.notes && (
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-xs">
-                      <p className="text-slate-400 font-medium">Notes</p>
-                      <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl text-xs">
+                      <p className="text-slate-500 font-medium">Notes</p>
+                      <p className="font-semibold text-[#0d1f15] mt-0.5">
                         {selectedExpense.notes}
                       </p>
                     </div>
@@ -494,16 +494,16 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   {/* Line Items if available */}
                   {selectedExpense.items && selectedExpense.items.length > 0 && (
                     <div className="space-y-1.5">
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      <p className="text-xs font-bold text-[#0d1f15]">
                         Line Items Breakdown ({selectedExpense.items.length})
                       </p>
-                      <div className="p-2 bg-slate-50 dark:bg-slate-800/60 rounded-xl divide-y divide-slate-200 dark:divide-slate-700 text-xs">
+                      <div className="p-2 bg-white border border-[#d5dbcb] rounded-xl divide-y divide-[#d5dbcb] text-xs">
                         {selectedExpense.items.map((item, idx) => (
                           <div key={idx} className="py-1.5 flex items-center justify-between">
-                            <span className="font-medium text-slate-800 dark:text-slate-200">
+                            <span className="font-medium text-[#0d1f15]">
                               {item.name} {item.qty ? `x${item.qty}` : ''}
                             </span>
-                            <span className="font-bold text-slate-900 dark:text-white">
+                            <span className="font-bold text-[#0d1f15]">
                               ₹{item.price}
                             </span>
                           </div>
@@ -515,10 +515,10 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   {/* Receipt Image Preview */}
                   {selectedExpense.receiptImage && (
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      <p className="text-xs font-bold text-[#0d1f15]">
                         Attached Receipt Image
                       </p>
-                      <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 max-h-48">
+                      <div className="rounded-2xl overflow-hidden border border-[#d5dbcb] max-h-48">
                         <img
                           src={selectedExpense.receiptImage}
                           alt="Receipt"
@@ -532,18 +532,18 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
             </div>
 
             {/* Footer Buttons */}
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between gap-2">
+            <div className="p-4 border-t border-[#d5dbcb] bg-[#e5e9d3] flex items-center justify-between gap-2">
               {isEditing ? (
                 <>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300"
+                    className="px-4 py-2 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 bg-white hover:bg-[#e5e9d3]"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveEdit}
-                    className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold"
+                    className="px-5 py-2 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold"
                   >
                     Save Changes
                   </button>
@@ -553,21 +553,21 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleStartEdit(selectedExpense)}
-                      className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1"
+                      className="p-2 rounded-xl bg-white border border-[#d5dbcb] hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center gap-1"
                     >
-                      <Edit className="w-3.5 h-3.5" /> Edit
+                      <Edit className="w-3.5 h-3.5 text-[#0a452b]" /> Edit
                     </button>
                     <button
                       onClick={() => handleShare(selectedExpense)}
-                      className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1"
+                      className="p-2 rounded-xl bg-white border border-[#d5dbcb] hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center gap-1"
                     >
-                      <Share2 className="w-3.5 h-3.5" /> Share
+                      <Share2 className="w-3.5 h-3.5 text-[#0a452b]" /> Share
                     </button>
                   </div>
 
                   <button
                     onClick={() => handleDelete(selectedExpense.id)}
-                    className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-1"
+                    className="p-2 rounded-xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-bold flex items-center gap-1"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> Delete
                   </button>

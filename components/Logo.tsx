@@ -26,7 +26,7 @@ export const Logo: React.FC<LogoProps> = ({
 
   if (variant === 'full-image' || (variant === 'full' && size === 'xl')) {
     return (
-      <div className={`relative flex items-center justify-center overflow-hidden rounded-2xl shadow-sm border border-[#D5DBCB] dark:border-slate-800 ${currentHeight} ${className}`}>
+      <div className={`relative flex items-center justify-center overflow-hidden rounded-2xl shadow-sm border border-[#D5DBCB] ${currentHeight} ${className}`}>
         <img
           src="/logo.svg"
           alt="PaisaKG - Paisa Kha Gya?"
@@ -39,7 +39,7 @@ export const Logo: React.FC<LogoProps> = ({
   return (
     <div className={`flex items-center gap-2.5 ${currentHeight} ${className}`}>
       {/* Full Logo Badge matching exact uploaded visual identity */}
-      <div className="h-full bg-[#E6EBDC] dark:bg-slate-900 border border-[#D5DBCB] dark:border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-sm shrink-0">
+      <div className="h-full bg-[#E6EBDC] border border-[#D5DBCB] rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-sm shrink-0">
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-auto aspect-square shrink-0">
           <path
             d="M15 18H85M15 42H85M15 42C40 42 70 48 70 72C70 96 40 100 15 100M15 100L65 140"
@@ -52,7 +52,7 @@ export const Logo: React.FC<LogoProps> = ({
         </svg>
 
         {showText && (
-          <div className="flex flex-col justify-center leading-none text-[#0A3A22] dark:text-emerald-400">
+          <div className="flex flex-col justify-center leading-none text-[#0A3A22]">
             <span className="font-black text-xs tracking-wider">PAISA</span>
             <span className="font-bold text-[10px] tracking-wider opacity-90">KHA</span>
             <span className="font-bold text-[10px] tracking-wider opacity-90">GYA?</span>
@@ -62,10 +62,10 @@ export const Logo: React.FC<LogoProps> = ({
 
       {showText && (
         <div className="flex flex-col justify-center leading-tight">
-          <span className="font-black text-slate-900 dark:text-white tracking-tight text-base sm:text-lg">
+          <span className="font-black text-[#0d1f15] tracking-tight text-base sm:text-lg">
             PaisaKG
           </span>
-          <span className="text-[10px] font-bold text-[#0A3A22] dark:text-emerald-400 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-[#0a452b] uppercase tracking-wider">
             Family Tracker
           </span>
         </div>

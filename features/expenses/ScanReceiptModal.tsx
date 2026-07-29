@@ -166,19 +166,19 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-[#f2f5e8] rounded-3xl shadow-2xl border border-[#d5dbcb] w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="px-5 py-4 border-b border-[#d5dbcb] flex items-center justify-between bg-[#e5e9d3]">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center">
               <ScanLine className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+              <h2 className="text-base font-bold text-[#0d1f15]">
                 Scan Receipt with AI OCR
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-600">
                 Auto-extract total, merchant, date & line items
               </p>
             </div>
@@ -188,7 +188,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
               onClose();
               resetModal();
             }}
-            className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-full text-slate-500 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/50 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -197,8 +197,8 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
         {/* Modal Content Body */}
         <div className="p-5 overflow-y-auto flex-1">
           {errorMsg && (
-            <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-medium border border-rose-200 dark:border-rose-800 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500" />
+            <div className="mb-4 p-3 rounded-xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -208,18 +208,18 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
             <div className="space-y-4">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-emerald-300 dark:border-emerald-800 hover:border-emerald-500 dark:hover:border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20 rounded-3xl p-8 text-center cursor-pointer transition-all hover:scale-[0.99] group"
+                className="border-2 border-dashed border-[#0a452b]/40 hover:border-[#0a452b] bg-[#e5e9d3] rounded-3xl p-8 text-center cursor-pointer transition-all hover:scale-[0.99] group"
               >
-                <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-full bg-[#0a452b] text-white flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                   <Camera className="w-8 h-8" />
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                <h3 className="text-sm font-bold text-[#0d1f15] mb-1">
                   Upload or Snap Receipt
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto mb-4">
+                <p className="text-xs text-slate-600 max-w-xs mx-auto mb-4">
                   Tap to capture with camera or choose image from gallery (JPG, PNG)
                 </p>
-                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all">
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-md transition-all">
                   <Upload className="w-4 h-4" />
                   Select Image
                 </span>
@@ -235,8 +235,8 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
 
               {/* Sample test receipts for instant testing */}
               <div className="pt-2">
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Or try sample receipts for instant testing:
+                <p className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Or try sample receipts for instant testing:
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -245,12 +245,12 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                       setSelectedImage(sample1);
                       processOCR(sample1);
                     }}
-                    className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:border-emerald-500 text-left transition-all flex items-center gap-2"
+                    className="p-3 rounded-2xl border border-[#d5dbcb] bg-white hover:border-[#0a452b] text-left transition-all flex items-center gap-2"
                   >
-                    <Receipt className="w-4 h-4 text-emerald-600" />
+                    <Receipt className="w-4 h-4 text-[#0a452b]" />
                     <div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Supermarket Bill</p>
-                      <p className="text-[10px] text-slate-400">Grocery items sample</p>
+                      <p className="text-xs font-bold text-[#0d1f15]">Supermarket Bill</p>
+                      <p className="text-[10px] text-slate-500">Grocery items sample</p>
                     </div>
                   </button>
                   <button
@@ -259,12 +259,12 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                       setSelectedImage(sample2);
                       processOCR(sample2);
                     }}
-                    className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:border-emerald-500 text-left transition-all flex items-center gap-2"
+                    className="p-3 rounded-2xl border border-[#d5dbcb] bg-white hover:border-[#0a452b] text-left transition-all flex items-center gap-2"
                   >
-                    <Receipt className="w-4 h-4 text-blue-600" />
+                    <Receipt className="w-4 h-4 text-blue-700" />
                     <div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Diner Bill</p>
-                      <p className="text-[10px] text-slate-400">Food & Dining sample</p>
+                      <p className="text-xs font-bold text-[#0d1f15]">Diner Bill</p>
+                      <p className="text-[10px] text-slate-500">Food & Dining sample</p>
                     </div>
                   </button>
                 </div>
@@ -275,7 +275,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
           {/* STEP 2: OCR SCANNING ANIMATION */}
           {step === 'scanning' && (
             <div className="py-12 text-center space-y-4">
-              <div className="relative w-48 h-64 mx-auto rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-xl">
+              <div className="relative w-48 h-64 mx-auto rounded-2xl overflow-hidden border-2 border-[#0a452b] shadow-xl">
                 {selectedImage && (
                   <img
                     src={selectedImage}
@@ -284,15 +284,15 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                   />
                 )}
                 {/* Scanner laser bar animation */}
-                <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-emerald-400 via-green-300 to-emerald-400 shadow-[0_0_15px_#10B981] animate-bounce" />
+                <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-500 shadow-[0_0_15px_#0a452b] animate-bounce" />
               </div>
 
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
-                  <RefreshCw className="w-4 h-4 animate-spin text-emerald-600" />
+                <h3 className="text-base font-bold text-[#0d1f15] flex items-center justify-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#0a452b]" />
                   Gemini AI Analyzing Receipt...
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-slate-600 mt-1">
                   Extracting store name, total price, dates and line items...
                 </p>
               </div>
@@ -306,10 +306,10 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
               <div
                 className={`p-3 rounded-2xl border flex items-center justify-between text-xs font-medium ${
                   confidenceScore >= 80
-                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                     : confidenceScore >= 50
-                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                    : 'bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                    ? 'bg-amber-50 text-amber-800 border-amber-200'
+                    : 'bg-rose-50 text-rose-800 border-rose-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -331,7 +331,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                 {selectedImage && (
                   <button
                     onClick={() => setShowEnlargedImage(true)}
-                    className="p-1.5 rounded-lg bg-white/80 dark:bg-slate-800 hover:bg-white text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1 shadow-sm shrink-0"
+                    className="p-1.5 rounded-lg bg-white hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center gap-1 shadow-sm shrink-0 border border-[#d5dbcb]"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     View Photo
@@ -342,12 +342,12 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
               {/* Editable Fields Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Total Amount */}
-                <div className="sm:col-span-2 bg-emerald-50/50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-200 dark:border-emerald-900">
-                  <label className="block text-[11px] font-bold uppercase text-emerald-800 dark:text-emerald-400 mb-1">
+                <div className="sm:col-span-2 bg-[#e5e9d3] p-3 rounded-2xl border border-[#d5dbcb]">
+                  <label className="block text-[11px] font-bold uppercase text-[#0a452b] mb-1">
                     Total Amount (₹) *
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-lg font-extrabold text-emerald-700 dark:text-emerald-400">
+                    <span className="absolute left-3 top-2.5 text-lg font-extrabold text-[#0a452b]">
                       ₹
                     </span>
                     <input
@@ -356,14 +356,14 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                       value={amount}
                       onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
                       placeholder="0.00"
-                      className="w-full pl-8 pr-4 py-2 text-xl font-extrabold bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full pl-8 pr-4 py-2 text-xl font-extrabold bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     />
                   </div>
                 </div>
 
                 {/* Merchant Name */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
                     Store / Merchant *
                   </label>
                   <input
@@ -371,19 +371,19 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder="e.g. Reliance Fresh"
-                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                   />
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
                     Category *
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as ExpenseCategoryKey)}
-                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                   >
                     {Object.values(CATEGORIES).map((cat) => (
                       <option key={cat.key} value={cat.key}>
@@ -395,26 +395,26 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
 
                 {/* Expense Date */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
                     Receipt Date *
                   </label>
                   <input
                     type="date"
                     value={expenseDate}
                     onChange={(e) => setExpenseDate(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                   />
                 </div>
 
                 {/* Paid By Member */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
                     Paid By *
                   </label>
                   <select
                     value={paidByUserId}
                     onChange={(e) => setPaidByUserId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                   >
                     {familyMembers.map((m) => (
                       <option key={m.userId} value={m.userId}>
@@ -428,13 +428,13 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
               {/* Items Breakdown Table */}
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <label className="text-xs font-bold text-slate-700">
                     Detected Line Items ({items.length})
                   </label>
                   <button
                     type="button"
                     onClick={handleAddItem}
-                    className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                    className="text-[11px] font-bold text-[#0a452b] hover:underline flex items-center gap-1"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Item
                   </button>
@@ -445,7 +445,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                     {items.map((item, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs"
+                        className="flex items-center gap-2 p-2 rounded-xl bg-white border border-[#d5dbcb] text-xs"
                       >
                         <input
                           type="text"
@@ -456,7 +456,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                             setItems(newItems);
                           }}
                           placeholder="Item name"
-                          className="flex-1 bg-transparent border-none focus:outline-none text-slate-900 dark:text-white font-medium"
+                          className="flex-1 bg-transparent border-none focus:outline-none text-[#0d1f15] font-medium"
                         />
                         <input
                           type="number"
@@ -467,12 +467,12 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                             setItems(newItems);
                           }}
                           placeholder="Price"
-                          className="w-20 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-right font-bold text-slate-900 dark:text-white"
+                          className="w-20 px-2 py-1 bg-[#f2f5e8] border border-[#d5dbcb] rounded-lg text-right font-bold text-[#0d1f15]"
                         />
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(index)}
-                          className="p-1 text-slate-400 hover:text-rose-500"
+                          className="p-1 text-slate-400 hover:text-rose-600"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -480,7 +480,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[11px] text-slate-400 italic bg-slate-50 dark:bg-slate-800/40 p-2.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <p className="text-[11px] text-slate-500 italic bg-white p-2.5 rounded-xl border border-dashed border-[#d5dbcb]">
                     No individual items extracted. You can add items manually above.
                   </p>
                 )}
@@ -488,7 +488,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
 
               {/* Notes */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   Notes / Tags
                 </label>
                 <input
@@ -496,7 +496,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Optional details or tags"
-                  className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
             </div>
@@ -504,19 +504,19 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
         </div>
 
         {/* Modal Footer Buttons */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between gap-3">
+        <div className="p-4 border-t border-[#d5dbcb] bg-[#e5e9d3] flex items-center justify-between gap-3">
           {step === 'review' ? (
             <>
               <button
                 onClick={() => setStep('upload')}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                className="px-4 py-2.5 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 hover:bg-[#f2f5e8] transition-colors flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Retake
               </button>
               <button
                 onClick={handleSaveExpense}
-                className="flex-1 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-5 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 Save Family Expense
@@ -528,7 +528,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                 onClose();
                 resetModal();
               }}
-              className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="w-full py-2.5 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 hover:bg-[#f2f5e8] transition-colors"
             >
               Cancel
             </button>

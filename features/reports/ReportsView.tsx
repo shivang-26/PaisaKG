@@ -181,14 +181,14 @@ export const ReportsView: React.FC = () => {
           </p>
         </div>
 
-        <div className="p-5 rounded-[24px] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="p-5 rounded-[24px] bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm">
+          <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             Highest Expense
           </p>
-          <p className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mt-1">
+          <p className="text-lg sm:text-2xl font-bold text-[#0d1f15] mt-1">
             {formatAmount(highestExpense, currentFamily?.currency || '₹')}
           </p>
-          <p className="text-[10px] text-amber-500 font-semibold mt-1">
+          <p className="text-[10px] text-amber-700 font-semibold mt-1">
             Single largest
           </p>
         </div>
@@ -197,9 +197,9 @@ export const ReportsView: React.FC = () => {
       {/* Recharts Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Category Pie Chart */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-            <PieIcon className="w-4 h-4 text-emerald-600" /> Category Share
+        <div className="p-5 rounded-3xl bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm space-y-3">
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#0a452b] flex items-center gap-1.5">
+            <PieIcon className="w-4 h-4 text-[#0a452b]" /> Category Share
           </h2>
 
           {categoryData.length > 0 ? (
@@ -232,7 +232,7 @@ export const ReportsView: React.FC = () => {
                 {categoryData.map((cat, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300"
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0d1f15]"
                   >
                     <span
                       className="w-2.5 h-2.5 rounded-full"
@@ -244,16 +244,16 @@ export const ReportsView: React.FC = () => {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-slate-400 py-10 text-center">
+            <p className="text-xs text-slate-500 py-10 text-center">
               No category data available.
             </p>
           )}
         </div>
 
         {/* Daily Spending Bar Chart */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-            <BarChart3 className="w-4 h-4 text-emerald-600" /> 14-Day Spending Trend
+        <div className="p-5 rounded-3xl bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm space-y-3">
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#0a452b] flex items-center gap-1.5">
+            <BarChart3 className="w-4 h-4 text-[#0a452b]" /> 14-Day Spending Trend
           </h2>
 
           <div className="h-64 w-full pt-2">
@@ -268,7 +268,7 @@ export const ReportsView: React.FC = () => {
                     'Daily Total',
                   ]}
                 />
-                <Bar dataKey="amount" fill="#16A34A" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="amount" fill="#0a452b" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -278,9 +278,9 @@ export const ReportsView: React.FC = () => {
       {/* Top Spenders & Top Merchants */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Top Family Spenders */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-            <Users className="w-4 h-4 text-emerald-600" /> Top Family Spenders
+        <div className="p-5 rounded-3xl bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm space-y-3">
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#0a452b] flex items-center gap-1.5">
+            <Users className="w-4 h-4 text-[#0a452b]" /> Top Family Spenders
           </h2>
 
           <div className="space-y-2">
@@ -291,7 +291,7 @@ export const ReportsView: React.FC = () => {
               return (
                 <div
                   key={idx}
-                  className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs"
+                  className="p-3 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-2.5">
                     <img
@@ -300,16 +300,16 @@ export const ReportsView: React.FC = () => {
                       className="w-8 h-8 rounded-full object-cover"
                     />
                     <div>
-                      <p className="font-bold text-slate-900 dark:text-white">
+                      <p className="font-bold text-[#0d1f15]">
                         {spender.name}
                       </p>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-slate-500">
                         {spender.count} expenses ({percent}% of family total)
                       </p>
                     </div>
                   </div>
 
-                  <p className="font-black text-slate-900 dark:text-white text-sm">
+                  <p className="font-black text-[#0d1f15] text-sm">
                     {formatAmount(spender.amount, currentFamily?.currency || '₹')}
                   </p>
                 </div>
@@ -319,27 +319,27 @@ export const ReportsView: React.FC = () => {
         </div>
 
         {/* Top Merchants */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-            <Store className="w-4 h-4 text-emerald-600" /> Top Merchants
+        <div className="p-5 rounded-3xl bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm space-y-3">
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#0a452b] flex items-center gap-1.5">
+            <Store className="w-4 h-4 text-[#0a452b]" /> Top Merchants
           </h2>
 
           <div className="space-y-2">
             {topMerchants.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs"
+                className="p-3 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between text-xs"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-xl bg-[#e5e9d3] text-[#0a452b] flex items-center justify-center font-bold text-xs">
                     #{idx + 1}
                   </div>
-                  <span className="font-bold text-slate-900 dark:text-white">
+                  <span className="font-bold text-[#0d1f15]">
                     {item.merchant}
                   </span>
                 </div>
 
-                <p className="font-black text-slate-900 dark:text-white text-sm">
+                <p className="font-black text-[#0d1f15] text-sm">
                   {formatAmount(item.amount, currentFamily?.currency || '₹')}
                 </p>
               </div>

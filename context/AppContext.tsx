@@ -78,197 +78,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   });
 
-  // Monitor network status & Supabase auth changes
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    if (typeof window !== 'undefined') {
-      const isDark = localStorage.getItem('theme') === 'dark';
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-
-      // Register SW
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch((e) => console.log('SW Error:', e));
-      }
-    }
-
-    // Subscribe to Supabase Auth state changes (Magic link redirects, OAuth, etc.)
-    const supabase = getSupabaseClient();
-    let authSubscription: any = null;
-
-    if (supabase) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user?.email) {
-          const userEmail = session.user.email;
-          const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
-          verifyOtp(userEmail, 'magiclink', userFullName);
-        }
-      });
-
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user?.email) {
-          const userEmail = session.user.email;
-          const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
-          verifyOtp(userEmail, 'magiclink', userFullName);
-        }
-      });
-      authSubscription = data.subscription;
-    }
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      if (authSubscription) {
-        authSubscription.unsubscribe();
-      }
-    };
-  }, []);
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      if (next) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      }
-      return next;
-    });
-  };
-
-  const loadData = async () => {
-    setIsLoading(true);
-    try {
-      await seedInitialData();
-
-      // Get saved active user from local storage
-      const savedUserId = localStorage.getItem('activeUserId');
-      let activeUser: UserProfile | null = null;
-
-      if (savedUserId) {
-        const found = await db.users.get(savedUserId);
-        if (found) activeUser = found;
-      }
-
-      setCurrentUser(activeUser);
-
-      if (activeUser) {
-        // Find family membership
-        const memberRec = await db.family_members.where('userId').equals(activeUser.id).first();
-        if (memberRec) {
-          const family = await db.families.get(memberRec.familyId);
-          if (family) {
-            setCurrentFamily(family);
-
-            // Fetch all members for this family
-            const members = await db.family_members.where('familyId').equals(family.id).toArray();
-            setFamilyMembers(members);
-
-            // Fetch expenses for this family
-            const familyExpenses = await db.expenses.where('familyId').equals(family.id).reverse().toArray();
-            setExpenses(familyExpenses);
-          }
-        }
-      }
-
-      const syncCount = await db.sync_queue.count();
-      setSyncQueueCount(syncCount);
-    } catch (err) {
-      console.error('Failed to load DB:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let active = true;
-    const init = async () => {
-      if (active) {
-        await loadData();
-      }
-    };
-    init();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const refreshData = async () => {
-    if (!currentFamily) return;
-    const members = await db.family_members.where('familyId').equals(currentFamily.id).toArray();
-    setFamilyMembers(members);
-    const familyExpenses = await db.expenses.where('familyId').equals(currentFamily.id).reverse().toArray();
-    setExpenses(familyExpenses);
-    const syncCount = await db.sync_queue.count();
-    setSyncQueueCount(syncCount);
-  };
-
   const [hasSupabase] = useState<boolean>(() => {
     const { url, key } = getSupabaseCredentials();
     return Boolean(url && key);
   });
-
-  const sendOtp = async (email: string): Promise<{ success: boolean; error?: string }> => {
-    if (hasSupabase) {
-      return await sendSupabaseOtp(email);
-    }
-    // Fallback mode if Supabase credentials are not yet set
-    return { success: true };
-  };
-
-  const verifyOtp = async (
-    email: string,
-    code: string,
-    fullName?: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    if (hasSupabase) {
-      const res = await verifySupabaseOtp(email, code);
-      if (!res.success) {
-        return { success: false, error: res.error || 'Invalid OTP code' };
-      }
-    }
-    // Login user into local session
-    await loginWithEmail(email, code, fullName);
-    return { success: true };
-  };
-
-  const loginWithPassword = async (
-    email: string,
-    pass: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    if (hasSupabase) {
-      const res = await signInWithSupabasePassword(email, pass);
-      if (!res.success) {
-        return { success: false, error: res.error || 'Authentication failed' };
-      }
-    }
-    await loginWithEmail(email, '123456');
-    return { success: true };
-  };
-
-  const signUpWithPassword = async (
-    email: string,
-    pass: string,
-    fullName?: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    if (hasSupabase) {
-      const res = await signUpWithSupabasePassword(email, pass, fullName);
-      if (!res.success) {
-        return { success: false, error: res.error || 'Sign up failed' };
-      }
-    }
-    await loginWithEmail(email, '123456', fullName);
-    return { success: true };
-  };
 
   const loginWithEmail = async (email: string, otpCode: string, fullName?: string): Promise<boolean> => {
     // Standard OTP check or demo OTP
@@ -355,6 +168,180 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return true;
+  };
+
+  const verifyOtp = async (
+    email: string,
+    code: string,
+    fullName?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (hasSupabase) {
+      const res = await verifySupabaseOtp(email, code);
+      if (!res.success) {
+        return { success: false, error: res.error || 'Invalid OTP code' };
+      }
+    }
+    // Login user into local session
+    await loginWithEmail(email, code, fullName);
+    return { success: true };
+  };
+
+  // Monitor network status & Supabase auth changes
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    if (typeof window !== 'undefined') {
+      document.documentElement.classList.remove('dark');
+
+      // Register SW
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch((e) => console.log('SW Error:', e));
+      }
+    }
+
+    // Subscribe to Supabase Auth state changes (Magic link redirects, OAuth, etc.)
+    const supabase = getSupabaseClient();
+    let authSubscription: any = null;
+
+    if (supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user?.email) {
+          const userEmail = session.user.email;
+          const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
+          verifyOtp(userEmail, 'magiclink', userFullName);
+        }
+      });
+
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user?.email) {
+          const userEmail = session.user.email;
+          const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
+          verifyOtp(userEmail, 'magiclink', userFullName);
+        }
+      });
+      authSubscription = data.subscription;
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
+    };
+  }, []);
+
+  const toggleDarkMode = () => {
+    setDarkMode(false);
+    document.documentElement.classList.remove('dark');
+    localStorage.removeItem('theme');
+  };
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      await seedInitialData();
+
+      // Get saved active user from local storage
+      const savedUserId = localStorage.getItem('activeUserId');
+      let activeUser: UserProfile | null = null;
+
+      if (savedUserId) {
+        const found = await db.users.get(savedUserId);
+        if (found) activeUser = found;
+      }
+
+      setCurrentUser(activeUser);
+
+      if (activeUser) {
+        // Find family membership
+        const memberRec = await db.family_members.where('userId').equals(activeUser.id).first();
+        if (memberRec) {
+          const family = await db.families.get(memberRec.familyId);
+          if (family) {
+            setCurrentFamily(family);
+
+            // Fetch all members for this family
+            const members = await db.family_members.where('familyId').equals(family.id).toArray();
+            setFamilyMembers(members);
+
+            // Fetch expenses for this family
+            const familyExpenses = await db.expenses.where('familyId').equals(family.id).reverse().toArray();
+            setExpenses(familyExpenses);
+          }
+        }
+      }
+
+      const syncCount = await db.sync_queue.count();
+      setSyncQueueCount(syncCount);
+    } catch (err) {
+      console.error('Failed to load DB:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    const init = async () => {
+      if (active) {
+        await loadData();
+      }
+    };
+    init();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const refreshData = async () => {
+    if (!currentFamily) return;
+    const members = await db.family_members.where('familyId').equals(currentFamily.id).toArray();
+    setFamilyMembers(members);
+    const familyExpenses = await db.expenses.where('familyId').equals(currentFamily.id).reverse().toArray();
+    setExpenses(familyExpenses);
+    const syncCount = await db.sync_queue.count();
+    setSyncQueueCount(syncCount);
+  };
+
+  const sendOtp = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    if (hasSupabase) {
+      return await sendSupabaseOtp(email);
+    }
+    // Fallback mode if Supabase credentials are not yet set
+    return { success: true };
+  };
+
+  const loginWithPassword = async (
+    email: string,
+    pass: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (hasSupabase) {
+      const res = await signInWithSupabasePassword(email, pass);
+      if (!res.success) {
+        return { success: false, error: res.error || 'Authentication failed' };
+      }
+    }
+    await loginWithEmail(email, '123456');
+    return { success: true };
+  };
+
+  const signUpWithPassword = async (
+    email: string,
+    pass: string,
+    fullName?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (hasSupabase) {
+      const res = await signUpWithSupabasePassword(email, pass, fullName);
+      if (!res.success) {
+        return { success: false, error: res.error || 'Sign up failed' };
+      }
+    }
+    await loginWithEmail(email, '123456', fullName);
+    return { success: true };
   };
 
   const logout = () => {
