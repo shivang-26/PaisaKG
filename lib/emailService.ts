@@ -45,28 +45,11 @@ export async function sendOtpEmail(email: string, code: string): Promise<{ succe
       return { success: true };
     } catch (err: any) {
       console.error('[EmailService] SMTP error:', err);
-      // Fall through to secondary attempts
+      return { success: false, error: err.message || 'SMTP email delivery failed' };
     }
   }
 
-  // 2. Try sending via Supabase Auth signInWithOtp if configured
-  const supabase = getSupabaseClient();
-  if (supabase) {
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: cleanEmail,
-      });
-
-      if (!error) {
-        return { success: true };
-      }
-      console.warn('[EmailService] Supabase Auth OTP notice:', error.message);
-    } catch (err: any) {
-      console.error('[EmailService] Supabase Auth OTP failed:', err);
-    }
-  }
-
-  // 3. Fallback: Log to server stdout (production server log inspection)
-  console.log(`[PaisaKG Auth Server] OTP code generated for ${cleanEmail}: ${code}`);
+  // 2. Logging server-side OTP code
+  console.log(`[PaisaKG Custom Auth Server] Generated OTP for ${cleanEmail}: ${code}`);
   return { success: true };
 }
