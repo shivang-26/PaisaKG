@@ -35,7 +35,7 @@ interface AppContextType {
   hasSupabase: boolean;
   // Auth & Family Actions
   loginWithEmail: (email: string, otpCode: string, fullName?: string) => Promise<boolean>;
-  sendOtp: (email: string, isSignUp?: boolean) => Promise<{ success: boolean; code?: string; error?: string }>;
+  sendOtp: (email: string, isSignUp?: boolean) => Promise<{ success: boolean; error?: string }>;
   verifyOtp: (email: string, code: string, fullName?: string, isSignUp?: boolean) => Promise<{ success: boolean; error?: string }>;
   loginWithPassword: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signUpWithPassword: (email: string, pass: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
@@ -307,7 +307,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const sendOtp = async (
     email: string,
     isSignUp?: boolean
-  ): Promise<{ success: boolean; code?: string; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string }> => {
     const cleanEmail = email.toLowerCase().trim();
     const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
 
@@ -325,8 +325,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    const res = await sendCustomOtp(cleanEmail);
-    return { success: true, code: res.code };
+    const res = await sendCustomOtp(cleanEmail, isSignUp);
+    if (!res.success) {
+      return { success: false, error: res.error || 'Failed to send OTP code.' };
+    }
+    return { success: true };
   };
 
   const loginWithPassword = async (

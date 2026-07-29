@@ -61,10 +61,8 @@ export const AuthScreen: React.FC = () => {
         setErrorMsg(res.error || 'Failed to generate OTP code');
       } else {
         setOtpSent(true);
-        if (res.code) {
-          setOtpCode(res.code);
-        }
-        setSuccessMsg(`OTP verification code sent to ${cleanEmail}`);
+        setOtpCode(''); // Clean blank input for user to enter received code
+        setSuccessMsg(`Verification code dispatched to ${cleanEmail}`);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Error sending OTP');
@@ -180,38 +178,8 @@ export const AuthScreen: React.FC = () => {
         </div>
 
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-2">
-            <p className="font-semibold text-center">{errorMsg}</p>
-            {errorMsg.toLowerCase().includes('rate limit') && (
-              <div className="bg-white/80 p-2.5 rounded-xl border border-rose-200 space-y-2 text-[11px] text-slate-700">
-                <p className="leading-relaxed">
-                  💡 <strong>Why this happens:</strong> Supabase&apos;s free built-in email provider enforces a strict limit (3-4 emails/hour) to prevent spam.
-                </p>
-                <div className="flex flex-col gap-1.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setIsSubmitting(true);
-                      await verifyOtp(email || 'user@example.com', '123456', fullName, isSignUp);
-                      setIsSubmitting(false);
-                    }}
-                    className="w-full py-2 rounded-lg bg-[#0a452b] text-white font-bold text-xs hover:bg-[#07331f] flex items-center justify-center gap-1.5 shadow-sm"
-                  >
-                    ⚡ Instant Login (Bypass Email Limit)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode('password');
-                      setErrorMsg(null);
-                    }}
-                    className="w-full py-1.5 rounded-lg border border-[#d5dbcb] text-slate-700 font-semibold text-xs hover:bg-[#e5e9d3] text-center"
-                  >
-                    🔑 Switch to Password Login
-                  </button>
-                </div>
-              </div>
-            )}
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs text-center font-semibold">
+            {errorMsg}
           </div>
         )}
 
@@ -301,10 +269,10 @@ export const AuthScreen: React.FC = () => {
                 <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-[#0a452b] space-y-2">
                   <div className="flex items-center gap-2 font-bold">
                     <CheckCircle2 className="w-4 h-4 text-[#0a452b] shrink-0" />
-                    <span>OTP Code Generated for {email}</span>
+                    <span>Verification Code Sent to {email}</span>
                   </div>
                   <p className="text-[11px] text-slate-700 leading-relaxed pl-6">
-                    Enter the 6-digit verification code below to {isSignUp ? 'complete your account onboarding' : 'sign in'}:
+                    Enter the 6-digit verification code sent to your email to {isSignUp ? 'complete registration' : 'sign in'}:
                   </p>
                 </div>
 
@@ -319,7 +287,7 @@ export const AuthScreen: React.FC = () => {
                       required
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="e.g. 123456"
+                      placeholder="Enter 6-digit code"
                       className="w-full pl-9 pr-3 py-2.5 text-base font-mono font-bold tracking-widest bg-white border border-[#d5dbcb] rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                     />
                   </div>
@@ -342,24 +310,13 @@ export const AuthScreen: React.FC = () => {
                 <div className="pt-2 border-t border-[#d5dbcb] flex flex-col gap-2">
                   <button
                     type="button"
-                    onClick={async () => {
-                      setIsSubmitting(true);
-                      await verifyOtp(email, '123456', fullName, isSignUp);
-                      setIsSubmitting(false);
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-[#e5e9d3] text-[#0a452b] font-bold text-xs hover:bg-[#d5dbcb] transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    ⚡ Instant Demo Access
-                  </button>
-
-                  <button
-                    type="button"
                     onClick={() => setOtpSent(false)}
                     className="w-full text-center text-xs text-slate-600 hover:underline pt-1"
                   >
                     ← Change email address
                   </button>
                 </div>
+
               </form>
             )}
           </>

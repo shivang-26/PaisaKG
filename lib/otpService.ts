@@ -1,108 +1,59 @@
-export interface OtpRecord {
-  email: string;
-  code: string;
-  expiresAt: number;
-  createdAt: number;
-}
-
-const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
-
-const getOtpStore = (): Record<string, OtpRecord> => {
-  if (typeof window === 'undefined') return {};
-  try {
-    const raw = localStorage.getItem('custom_app_otps');
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-};
-
-const saveOtpStore = (store: Record<string, OtpRecord>) => {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem('custom_app_otps', JSON.stringify(store));
-  } catch {
-    // ignore
-  }
-};
-
 /**
- * Generate a cryptographically secure random 6-digit OTP code
+ * Client-side OTP API service calling secure server-side routes
  */
-export function generateCustomOtpCode(): string {
-  const digits = Math.floor(100000 + Math.random() * 900000).toString();
-  return digits;
-}
 
-/**
- * Generate and store custom OTP for an email address
- */
 export async function sendCustomOtp(
-  email: string
-): Promise<{ success: boolean; code: string }> {
-  const cleanEmail = email.toLowerCase().trim();
-  const code = generateCustomOtpCode();
-  const now = Date.now();
+  email: string,
+  isSignUp?: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, isSignUp }),
+    });
 
-  const store = getOtpStore();
-  store[cleanEmail] = {
-    email: cleanEmail,
-    code,
-    createdAt: now,
-    expiresAt: now + OTP_EXPIRY_MS,
-  };
-  saveOtpStore(store);
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return {
+        success: false,
+        error: data.error || 'Failed to send verification code. Please try again.',
+      };
+    }
 
-  return {
-    success: true,
-    code,
-  };
+    return { success: true };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err.message || 'Network error sending OTP request.',
+    };
+  }
 }
 
-/**
- * Verify custom generated OTP for an email
- */
 export async function verifyCustomOtp(
   email: string,
   inputCode: string
 ): Promise<{ success: boolean; error?: string }> {
-  const cleanEmail = email.toLowerCase().trim();
-  const cleanCode = inputCode.trim();
+  try {
+    const res = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code: inputCode }),
+    });
 
-  // Demo / fallback verification code
-  if (cleanCode === '123456') {
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return {
+        success: false,
+        error: data.error || 'Invalid 6-digit verification code.',
+      };
+    }
+
     return { success: true };
-  }
-
-  const store = getOtpStore();
-  const record = store[cleanEmail];
-
-  if (!record) {
+  } catch (err: any) {
     return {
       success: false,
-      error: 'No active OTP found for this email. Please request a new verification code.',
+      error: err.message || 'Network error verifying OTP code.',
     };
   }
-
-  if (Date.now() > record.expiresAt) {
-    delete store[cleanEmail];
-    saveOtpStore(store);
-    return {
-      success: false,
-      error: 'This OTP verification code has expired. Please request a new code.',
-    };
-  }
-
-  if (record.code !== cleanCode) {
-    return {
-      success: false,
-      error: 'Incorrect 6-digit OTP code. Please check and try again.',
-    };
-  }
-
-  // Clear used OTP on success
-  delete store[cleanEmail];
-  saveOtpStore(store);
-
-  return { success: true };
 }
