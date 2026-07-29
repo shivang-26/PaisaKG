@@ -2,15 +2,18 @@
  * Client-side OTP API service calling secure server-side routes
  */
 
+const tokenStore: Record<string, string> = {};
+
 export async function sendCustomOtp(
   email: string,
   isSignUp?: boolean
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const cleanEmail = email.toLowerCase().trim();
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, isSignUp }),
+      body: JSON.stringify({ email: cleanEmail, isSignUp }),
     });
 
     const data = await res.json();
@@ -19,6 +22,10 @@ export async function sendCustomOtp(
         success: false,
         error: data.error || 'Failed to send verification code. Please try again.',
       };
+    }
+
+    if (data.otpToken) {
+      tokenStore[cleanEmail] = data.otpToken;
     }
 
     return { success: true };
@@ -35,10 +42,13 @@ export async function verifyCustomOtp(
   inputCode: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const cleanEmail = email.toLowerCase().trim();
+    const token = tokenStore[cleanEmail];
+
     const res = await fetch('/api/auth/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code: inputCode }),
+      body: JSON.stringify({ email: cleanEmail, code: inputCode, token }),
     });
 
     const data = await res.json();
@@ -49,6 +59,7 @@ export async function verifyCustomOtp(
       };
     }
 
+    delete tokenStore[cleanEmail];
     return { success: true };
   } catch (err: any) {
     return {

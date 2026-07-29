@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateSecureOtpCode, setServerOtp } from '@/lib/serverOtpStore';
+import { generateSecureOtpCode, createSignedOtpToken } from '@/lib/serverOtpStore';
 import { sendOtpEmail } from '@/lib/emailService';
 
 export async function POST(req: NextRequest) {
@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
     // Generate secure random 6-digit code on the server
     const code = generateSecureOtpCode();
 
-    // Store in server-side memory/cache with 10 minute expiration
-    setServerOtp(cleanEmail, code);
+    // Create stateless HMAC token
+    const { token } = createSignedOtpToken(cleanEmail, code);
 
     // Dispatch email
     const emailRes = await sendOtpEmail(cleanEmail, code);
@@ -32,10 +32,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: `OTP verification code dispatched to ${cleanEmail}.`,
+      otpToken: token,
     });
+
+    // Also set HTTP-only cookie for seamless serverless/Vercel support
+    response.cookies.set(`otp_token_${encodeURIComponent(cleanEmail)}`, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 600, // 10 minutes
+    });
+
+    return response;
   } catch (err: any) {
     console.error('[API Send OTP Error]:', err);
     return NextResponse.json(

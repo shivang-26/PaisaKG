@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAndConsumeServerOtp } from '@/lib/serverOtpStore';
+import { verifySignedOtpToken } from '@/lib/serverOtpStore';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, code } = body || {};
+    const { email, code, token: bodyToken } = body || {};
 
     if (!email || !code) {
       return NextResponse.json(
@@ -16,8 +16,12 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     const cleanCode = code.toString().trim();
 
-    // Verify against server-side store
-    const result = verifyAndConsumeServerOtp(cleanEmail, cleanCode);
+    // Retrieve token from body or HTTP-only cookie
+    const cookieToken = req.cookies.get(`otp_token_${encodeURIComponent(cleanEmail)}`)?.value;
+    const tokenToVerify = bodyToken || cookieToken;
+
+    // Verify token statelessly
+    const result = verifySignedOtpToken(cleanEmail, cleanCode, tokenToVerify);
 
     if (!result.success) {
       return NextResponse.json(
@@ -26,10 +30,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: 'OTP verification successful.',
     });
+
+    // Clear cookie on success
+    response.cookies.delete(`otp_token_${encodeURIComponent(cleanEmail)}`);
+
+    return response;
   } catch (err: any) {
     console.error('[API Verify OTP Error]:', err);
     return NextResponse.json(

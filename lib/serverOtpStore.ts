@@ -1,77 +1,101 @@
 import crypto from 'crypto';
 
-export interface ServerOtpRecord {
-  email: string;
-  code: string;
-  expiresAt: number;
-}
-
-// Global in-memory cache for server-side OTP management
-const globalForOtp = global as unknown as {
-  otpCache?: Map<string, ServerOtpRecord>;
-};
-
-const otpCache = globalForOtp.otpCache || new Map<string, ServerOtpRecord>();
-if (process.env.NODE_ENV !== 'production') {
-  globalForOtp.otpCache = otpCache;
-}
-
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
+function getSecretKey(): string {
+  return (
+    process.env.OTP_SECRET ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    'paisa_kg_stateless_otp_signing_secret_2026'
+  );
+}
+
 /**
- * Generate a cryptographically secure 6-digit random string
+ * Generate a cryptographically secure 6-digit random number string
  */
 export function generateSecureOtpCode(): string {
   const buffer = crypto.randomBytes(4);
-  const num = buffer.readUInt32BE(0) % 900000 + 100000;
+  const num = (buffer.readUInt32BE(0) % 900000) + 100000;
   return num.toString();
 }
 
 /**
- * Save an OTP code for an email on the server
+ * Create a stateless HMAC-signed token for an OTP
  */
-export function setServerOtp(email: string, code: string): void {
+export function createSignedOtpToken(
+  email: string,
+  code: string
+): { token: string; expiresAt: number } {
   const cleanEmail = email.toLowerCase().trim();
   const expiresAt = Date.now() + OTP_TTL_MS;
-  otpCache.set(cleanEmail, {
-    email: cleanEmail,
-    code,
-    expiresAt,
-  });
+  const secret = getSecretKey();
+
+  const payload = `${cleanEmail}:${code}:${expiresAt}`;
+  const hmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  const token = `${expiresAt}.${hmac}`;
+
+  return { token, expiresAt };
 }
 
 /**
- * Verify an OTP code for an email on the server
+ * Verify a stateless HMAC-signed OTP token
  */
-export function verifyAndConsumeServerOtp(email: string, inputCode: string): { success: boolean; error?: string } {
+export function verifySignedOtpToken(
+  email: string,
+  inputCode: string,
+  token?: string | null
+): { success: boolean; error?: string } {
   const cleanEmail = email.toLowerCase().trim();
   const cleanCode = inputCode.trim();
 
-  const record = otpCache.get(cleanEmail);
-
-  if (!record) {
+  if (!token) {
     return {
       success: false,
-      error: 'No active OTP verification session found for this email. Please request a new code.',
+      error: 'No active OTP verification token found. Please request a new code.',
     };
   }
 
-  if (Date.now() > record.expiresAt) {
-    otpCache.delete(cleanEmail);
+  const parts = token.split('.');
+  if (parts.length !== 2) {
     return {
       success: false,
-      error: 'The verification code has expired. Please request a new OTP code.',
+      error: 'Invalid OTP verification token. Please request a new code.',
     };
   }
 
-  if (record.code !== cleanCode) {
+  const [expiresAtStr, providedHmac] = parts;
+  const expiresAt = parseInt(expiresAtStr, 10);
+
+  if (isNaN(expiresAt) || Date.now() > expiresAt) {
     return {
       success: false,
-      error: 'Invalid 6-digit verification code. Please check your email and try again.',
+      error: 'The 6-digit verification code has expired. Please request a new code.',
     };
   }
 
-  // Clear code after successful verification (one-time use)
-  otpCache.delete(cleanEmail);
-  return { success: true };
+  const secret = getSecretKey();
+  const payload = `${cleanEmail}:${cleanCode}:${expiresAt}`;
+  const expectedHmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+  try {
+    const isMatch = crypto.timingSafeEqual(
+      Buffer.from(providedHmac, 'hex'),
+      Buffer.from(expectedHmac, 'hex')
+    );
+
+    if (!isMatch) {
+      return {
+        success: false,
+        error: 'Incorrect 6-digit verification code. Please check your email and try again.',
+      };
+    }
+
+    return { success: true };
+  } catch {
+    return {
+      success: false,
+      error: 'Invalid verification token signature.',
+    };
+  }
 }

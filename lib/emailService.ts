@@ -1,13 +1,57 @@
 import nodemailer from 'nodemailer';
-import { getSupabaseClient } from './supabase';
 
 /**
  * Send an OTP verification code email to the specified user email address
  */
-export async function sendOtpEmail(email: string, code: string): Promise<{ success: boolean; error?: string }> {
+export async function sendOtpEmail(
+  email: string,
+  code: string
+): Promise<{ success: boolean; error?: string }> {
   const cleanEmail = email.toLowerCase().trim();
 
-  // 1. Try sending via custom SMTP if configured
+  // 1. Try sending via Resend API if RESEND_API_KEY is configured
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: process.env.SMTP_FROM || 'PaisaKG <onboarding@resend.dev>',
+          to: [cleanEmail],
+          subject: `Your PaisaKG Verification Code is ${code}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #0a452b; margin: 0; font-size: 24px;">PaisaKG</h2>
+                <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Family Expense Tracker</p>
+              </div>
+              <div style="background-color: #f8fafc; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                <p style="font-size: 14px; color: #334155; margin-bottom: 12px;">Your 6-digit email verification code is:</p>
+                <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #0a452b; background: #ffffff; padding: 12px 24px; display: inline-block; border-radius: 8px; border: 1px solid #cbd5e1;">
+                  ${code}
+                </div>
+                <p style="font-size: 12px; color: #64748b; margin-top: 12px; margin-bottom: 0;">This code is valid for 10 minutes. Do not share it with anyone.</p>
+              </div>
+              <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">If you did not request this code, please ignore this email.</p>
+            </div>
+          `,
+        }),
+      });
+
+      if (resendRes.ok) {
+        return { success: true };
+      }
+      const errData = await resendRes.json();
+      console.error('[EmailService] Resend API error:', errData);
+    } catch (err: any) {
+      console.error('[EmailService] Resend dispatch error:', err);
+    }
+  }
+
+  // 2. Try sending via custom SMTP if configured
   if (process.env.SMTP_HOST && process.env.SMTP_USER) {
     try {
       const transporter = nodemailer.createTransport({
@@ -45,11 +89,10 @@ export async function sendOtpEmail(email: string, code: string): Promise<{ succe
       return { success: true };
     } catch (err: any) {
       console.error('[EmailService] SMTP error:', err);
-      return { success: false, error: err.message || 'SMTP email delivery failed' };
     }
   }
 
-  // 2. Logging server-side OTP code
-  console.log(`[PaisaKG Custom Auth Server] Generated OTP for ${cleanEmail}: ${code}`);
+  // 3. Fallback: Log to server logs (Vercel Functions stdout / Cloud Run logs)
+  console.log(`[PaisaKG Auth Server] OTP verification code generated for ${cleanEmail}: ${code}`);
   return { success: true };
 }
