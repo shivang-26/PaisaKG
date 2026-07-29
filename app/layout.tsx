@@ -16,7 +16,8 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-icon" href="https://picsum.photos/seed/paisaicon192/192/192" />
+        <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+        <link rel="apple-touch-icon" href="/logo.svg" />
       </head>
       <body suppressHydrationWarning>{children}</body>
     </html>

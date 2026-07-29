@@ -98,8 +98,8 @@ export const PWAInstallBanner: React.FC = () => {
     <>
       <div className="bg-[#0a452b] text-white px-4 py-3 rounded-2xl shadow-md mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 border border-[#07331f]">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="w-10 h-10 rounded-xl bg-[#f2f5e8] text-[#0a452b] flex items-center justify-center font-bold text-lg shrink-0 shadow-sm">
-            ₹
+          <div className="w-10 h-10 rounded-xl bg-[#e5e9d3] p-1 flex items-center justify-center shrink-0 shadow-sm overflow-hidden border border-[#d5dbcb]">
+            <img src="/logo.svg" alt="PaisaKG Icon" className="w-full h-full object-contain" />
           </div>
           <div>
             <h4 className="font-bold text-sm leading-tight flex items-center gap-1.5">

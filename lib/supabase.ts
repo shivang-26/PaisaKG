@@ -32,7 +32,7 @@ export function getSupabaseClient(): SupabaseClient | null {
 }
 
 /**
- * Send magic link / OTP code via Supabase Auth
+ * Send OTP code via Supabase Auth
  */
 export async function sendSupabaseOtp(email: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseClient();
@@ -41,14 +41,9 @@ export async function sendSupabaseOtp(email: string): Promise<{ success: boolean
   }
 
   try {
-    const currentOrigin = typeof window !== 'undefined' && window.location.origin
-      ? window.location.origin
-      : 'https://paisa-kg.vercel.app';
-
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: currentOrigin,
         shouldCreateUser: true,
       },
     });

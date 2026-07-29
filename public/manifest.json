@@ -3,14 +3,10 @@
   "name": "PaisaKG Family Expense Tracker",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/paisaicon192/192/192",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "https://picsum.photos/seed/paisaicon512/512/512",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512 any",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",

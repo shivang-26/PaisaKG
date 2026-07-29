@@ -13,6 +13,8 @@ import {
   User,
   Check,
   ShieldCheck,
+  UserPlus,
+  LogIn,
 } from 'lucide-react';
 
 export const AuthScreen: React.FC = () => {
@@ -38,24 +40,31 @@ export const AuthScreen: React.FC = () => {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !email.includes('@')) {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
       setErrorMsg('Please enter a valid email address');
       return;
     }
+
+    if (isSignUp && !fullName.trim()) {
+      setErrorMsg('Please provide your Full Name for your new account');
+      return;
+    }
+
     setErrorMsg(null);
     setSuccessMsg(null);
     setIsSubmitting(true);
 
     try {
-      const res = await sendOtp(email.trim());
+      const res = await sendOtp(cleanEmail, isSignUp);
       if (!res.success) {
         setErrorMsg(res.error || 'Failed to send OTP code');
       } else {
         setOtpSent(true);
         if (!hasSupabase) {
-          setOtpCode('123456'); // Local fallback OTP when offline / local mode
+          setOtpCode('123456'); // Local fallback code for preview/testing
         }
-        setSuccessMsg(`OTP sent to ${email.trim()}`);
+        setSuccessMsg(`OTP verification code sent to ${cleanEmail}`);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Error sending OTP');
@@ -75,7 +84,7 @@ export const AuthScreen: React.FC = () => {
     setErrorMsg(null);
 
     try {
-      const res = await verifyOtp(email.trim(), otpCode.trim(), fullName.trim());
+      const res = await verifyOtp(email.trim(), otpCode.trim(), fullName.trim(), isSignUp);
       if (!res.success) {
         setErrorMsg(res.error || 'OTP verification failed');
       }
@@ -88,8 +97,16 @@ export const AuthScreen: React.FC = () => {
 
   const handlePasswordAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
+    const cleanEmail = email.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanEmail || !cleanPass) {
       setErrorMsg('Please provide both email and password');
+      return;
+    }
+
+    if (isSignUp && !fullName.trim()) {
+      setErrorMsg('Please provide your Full Name for your new account');
       return;
     }
 
@@ -98,10 +115,10 @@ export const AuthScreen: React.FC = () => {
 
     try {
       if (isSignUp) {
-        const res = await signUpWithPassword(email.trim(), password.trim(), fullName.trim());
+        const res = await signUpWithPassword(cleanEmail, cleanPass, fullName.trim());
         if (!res.success) setErrorMsg(res.error || 'Sign up failed');
       } else {
-        const res = await loginWithPassword(email.trim(), password.trim());
+        const res = await loginWithPassword(cleanEmail, cleanPass);
         if (!res.success) setErrorMsg(res.error || 'Invalid credentials');
       }
     } catch (err: any) {
@@ -125,7 +142,7 @@ export const AuthScreen: React.FC = () => {
         {/* Security / Production Indicator */}
         <div className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full bg-[#e5e9d3]/80 border border-[#d5dbcb] text-[11px] text-[#0a452b] font-medium">
           <ShieldCheck className="w-3.5 h-3.5 text-[#0a452b]" />
-          <span>Encrypted Cloud Auth & Real-Time Sync</span>
+          <span>Encrypted Email OTP Auth & Real-Time Sync</span>
         </div>
 
         {/* Auth Mode Toggle Tabs */}
@@ -134,6 +151,7 @@ export const AuthScreen: React.FC = () => {
             type="button"
             onClick={() => {
               setAuthMode('otp');
+              setOtpSent(false);
               setErrorMsg(null);
             }}
             className={`py-2 rounded-lg transition-all ${
@@ -142,12 +160,13 @@ export const AuthScreen: React.FC = () => {
                 : 'text-slate-700 hover:text-slate-900'
             }`}
           >
-            Email OTP / Magic Link
+            Email OTP
           </button>
           <button
             type="button"
             onClick={() => {
               setAuthMode('password');
+              setOtpSent(false);
               setErrorMsg(null);
             }}
             className={`py-2 rounded-lg transition-all ${
@@ -194,21 +213,24 @@ export const AuthScreen: React.FC = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Full Name (Optional)
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="e.g. John Doe"
-                      className="w-full pl-9 pr-3 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
-                    />
+                {isSignUp && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Full Name <span className="text-rose-600">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="text"
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="e.g. John Doe"
+                        className="w-full pl-9 pr-3 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <button
                   type="submit"
@@ -219,22 +241,40 @@ export const AuthScreen: React.FC = () => {
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" /> Sending Code...
                     </>
+                  ) : isSignUp ? (
+                    <>
+                      <UserPlus className="w-4 h-4" /> Send Onboarding OTP <ArrowRight className="w-4 h-4" />
+                    </>
                   ) : (
                     <>
-                      Send Login OTP <ArrowRight className="w-4 h-4" />
+                      <LogIn className="w-4 h-4" /> Send Login OTP <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
+
+                <p className="text-center text-xs text-slate-600 pt-1">
+                  {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setErrorMsg(null);
+                    }}
+                    className="font-bold text-[#0a452b] hover:underline"
+                  >
+                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                  </button>
+                </p>
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-4">
                 <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-[#0a452b] space-y-1">
                   <div className="flex items-center gap-2 font-bold">
                     <CheckCircle2 className="w-4 h-4 text-[#0a452b] shrink-0" />
-                    <span>Email sent to {email}</span>
+                    <span>OTP sent to {email}</span>
                   </div>
                   <p className="text-[11px] text-slate-700 leading-relaxed pl-6">
-                    📬 Click the <strong>Magic Login Link</strong> in your email to sign in automatically, or enter the verification code below:
+                    📬 Please enter the 6-digit verification code sent to your email address:
                   </p>
                 </div>
 
@@ -265,7 +305,7 @@ export const AuthScreen: React.FC = () => {
                       <RefreshCw className="w-4 h-4 animate-spin" /> Verifying...
                     </>
                   ) : (
-                    <>Verify Code & Sign In</>
+                    <>Verify Code & {isSignUp ? 'Complete Registration' : 'Sign In'}</>
                   )}
                 </button>
 
@@ -274,12 +314,12 @@ export const AuthScreen: React.FC = () => {
                     type="button"
                     onClick={async () => {
                       setIsSubmitting(true);
-                      await verifyOtp(email, '123456', fullName);
+                      await verifyOtp(email, '123456', fullName, isSignUp);
                       setIsSubmitting(false);
                     }}
                     className="w-full py-2.5 rounded-xl bg-[#e5e9d3] text-[#0a452b] font-bold text-xs hover:bg-[#d5dbcb] transition-colors flex items-center justify-center gap-1.5"
                   >
-                    ⚡ Instant Demo Access (Bypass Email)
+                    ⚡ Instant Demo Access
                   </button>
 
                   <button
@@ -287,7 +327,7 @@ export const AuthScreen: React.FC = () => {
                     onClick={() => setOtpSent(false)}
                     className="w-full text-center text-xs text-slate-600 hover:underline pt-1"
                   >
-                    ← Back to email address
+                    ← Change email address
                   </button>
                 </div>
               </form>
@@ -318,7 +358,7 @@ export const AuthScreen: React.FC = () => {
             {isSignUp && (
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Full Name
+                  Full Name <span className="text-rose-600">*</span>
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -362,7 +402,7 @@ export const AuthScreen: React.FC = () => {
                   <RefreshCw className="w-4 h-4 animate-spin" /> Processing...
                 </>
               ) : isSignUp ? (
-                <>Create Account</>
+                <>Create Account & Onboard</>
               ) : (
                 <>Sign In</>
               )}
@@ -372,7 +412,10 @@ export const AuthScreen: React.FC = () => {
               {isSignUp ? 'Already have an account?' : "Don't have an account yet?"}{' '}
               <button
                 type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setErrorMsg(null);
+                }}
                 className="font-bold text-[#0a452b] hover:underline"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}

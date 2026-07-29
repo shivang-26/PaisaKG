@@ -36,8 +36,8 @@ interface AppContextType {
   hasSupabase: boolean;
   // Auth & Family Actions
   loginWithEmail: (email: string, otpCode: string, fullName?: string) => Promise<boolean>;
-  sendOtp: (email: string) => Promise<{ success: boolean; error?: string }>;
-  verifyOtp: (email: string, code: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
+  sendOtp: (email: string, isSignUp?: boolean) => Promise<{ success: boolean; error?: string }>;
+  verifyOtp: (email: string, code: string, fullName?: string, isSignUp?: boolean) => Promise<{ success: boolean; error?: string }>;
   loginWithPassword: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signUpWithPassword: (email: string, pass: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
@@ -84,15 +84,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const loginWithEmail = async (email: string, otpCode: string, fullName?: string): Promise<boolean> => {
-    // Standard OTP check or demo OTP
-    let user = await db.users.where('email').equalsIgnoreCase(email).first();
+    const cleanEmail = email.toLowerCase().trim();
+    let user = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
     if (!user) {
       const newUserId = generateId('usr');
       user = {
         id: newUserId,
-        email: email.toLowerCase(),
-        fullName: fullName || email.split('@')[0],
-        avatarUrl: `https://picsum.photos/seed/${newUserId}/100/100`,
+        email: cleanEmail,
+        fullName: fullName?.trim() || cleanEmail.split('@')[0],
+        avatarUrl: '/logo.svg',
         createdAt: new Date().toISOString(),
       };
       await db.users.add(user);
@@ -101,7 +101,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(user);
     localStorage.setItem('activeUserId', user.id);
 
-    // Find family
+    // Find family membership
     const memberRec = await db.family_members.where('userId').equals(user.id).first();
     if (memberRec) {
       const family = await db.families.get(memberRec.familyId);
@@ -113,58 +113,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setExpenses(familyExpenses);
       }
     } else {
-      // Connect to existing family if available or create a fresh family for this user
-      const allFamilies = await db.families.toArray();
-      const firstFam = allFamilies[0] || null;
-      if (firstFam) {
-        const newMem: FamilyMember = {
-          id: generateId('mem'),
-          familyId: firstFam.id,
-          userId: user.id,
-          fullName: user.fullName,
-          email: user.email,
-          role: 'Member',
-          avatarUrl: user.avatarUrl,
-          joinedAt: new Date().toISOString(),
-        };
-        await db.family_members.add(newMem);
-        setCurrentFamily(firstFam);
-        const members = await db.family_members.where('familyId').equals(firstFam.id).toArray();
-        setFamilyMembers(members);
-        const familyExpenses = await db.expenses.where('familyId').equals(firstFam.id).reverse().toArray();
-        setExpenses(familyExpenses);
-      } else {
-        // Create new empty family workspace for user
-        const newFamId = generateId('fam');
-        const newFamName = `${user.fullName}'s Family`;
-        const inviteCode = generateInviteCode();
-        const newFam: Family = {
-          id: newFamId,
-          name: newFamName,
-          inviteCode,
-          createdBy: user.id,
-          monthlyBudget: 75000,
-          currency: '₹',
-          createdAt: new Date().toISOString(),
-        };
-        await db.families.add(newFam);
+      // New account onboarding: Create their dedicated new family workspace
+      const newFamId = generateId('fam');
+      const newFamName = `${user.fullName}'s Family`;
+      const inviteCode = generateInviteCode();
+      const newFam: Family = {
+        id: newFamId,
+        name: newFamName,
+        inviteCode,
+        createdBy: user.id,
+        monthlyBudget: 75000,
+        currency: '₹',
+        createdAt: new Date().toISOString(),
+      };
+      await db.families.add(newFam);
 
-        const newMem: FamilyMember = {
-          id: generateId('mem'),
-          familyId: newFamId,
-          userId: user.id,
-          fullName: user.fullName,
-          email: user.email,
-          role: 'Admin',
-          avatarUrl: user.avatarUrl,
-          joinedAt: new Date().toISOString(),
-        };
-        await db.family_members.add(newMem);
+      const newMem: FamilyMember = {
+        id: generateId('mem'),
+        familyId: newFamId,
+        userId: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: 'Admin',
+        avatarUrl: user.avatarUrl,
+        joinedAt: new Date().toISOString(),
+      };
+      await db.family_members.add(newMem);
 
-        setCurrentFamily(newFam);
-        setFamilyMembers([newMem]);
-        setExpenses([]);
-      }
+      setCurrentFamily(newFam);
+      setFamilyMembers([newMem]);
+      setExpenses([]);
     }
 
     return true;
@@ -173,16 +151,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const verifyOtp = async (
     email: string,
     code: string,
-    fullName?: string
+    fullName?: string,
+    isSignUp?: boolean
   ): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = email.toLowerCase().trim();
+
+    if (isSignUp) {
+      const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+      if (existingUser) {
+        return {
+          success: false,
+          error: 'An account with this email address already exists. Please sign in instead.',
+        };
+      }
+    }
+
     if (hasSupabase) {
-      const res = await verifySupabaseOtp(email, code);
+      const res = await verifySupabaseOtp(cleanEmail, code);
       if (!res.success) {
         return { success: false, error: res.error || 'Invalid OTP code' };
       }
     }
-    // Login user into local session
-    await loginWithEmail(email, code, fullName);
+    // Login or onboard user into local session
+    await loginWithEmail(cleanEmail, code, fullName);
     return { success: true };
   };
 
@@ -196,13 +187,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (typeof window !== 'undefined') {
       document.documentElement.classList.remove('dark');
 
-      // Register SW
+      // Register SW safely
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch((e) => console.log('SW Error:', e));
       }
     }
 
-    // Subscribe to Supabase Auth state changes (Magic link redirects, OAuth, etc.)
+    // Subscribe to Supabase Auth state changes
     const supabase = getSupabaseClient();
     let authSubscription: any = null;
 
@@ -211,7 +202,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (session?.user?.email) {
           const userEmail = session.user.email;
           const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
-          verifyOtp(userEmail, 'magiclink', userFullName);
+          verifyOtp(userEmail, '123456', userFullName);
         }
       });
 
@@ -219,7 +210,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (session?.user?.email) {
           const userEmail = session.user.email;
           const userFullName = session.user.user_metadata?.full_name || userEmail.split('@')[0];
-          verifyOtp(userEmail, 'magiclink', userFullName);
+          verifyOtp(userEmail, '123456', userFullName);
         }
       });
       authSubscription = data.subscription;
@@ -307,11 +298,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSyncQueueCount(syncCount);
   };
 
-  const sendOtp = async (email: string): Promise<{ success: boolean; error?: string }> => {
-    if (hasSupabase) {
-      return await sendSupabaseOtp(email);
+  const sendOtp = async (email: string, isSignUp?: boolean): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = email.toLowerCase().trim();
+    const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+
+    if (isSignUp && existingUser) {
+      return {
+        success: false,
+        error: 'An account with this email address already exists. Please sign in instead.',
+      };
     }
-    // Fallback mode if Supabase credentials are not yet set
+
+    if (!isSignUp && !existingUser && !hasSupabase) {
+      return {
+        success: false,
+        error: 'No account found with this email. Please sign up to create a new account.',
+      };
+    }
+
+    if (hasSupabase) {
+      return await sendSupabaseOtp(cleanEmail);
+    }
+
     return { success: true };
   };
 
@@ -319,13 +327,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     email: string,
     pass: string
   ): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = email.toLowerCase().trim();
+
     if (hasSupabase) {
-      const res = await signInWithSupabasePassword(email, pass);
+      const res = await signInWithSupabasePassword(cleanEmail, pass);
       if (!res.success) {
-        return { success: false, error: res.error || 'Authentication failed' };
+        return { success: false, error: res.error || 'Invalid email or password' };
+      }
+    } else {
+      const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+      if (!existingUser) {
+        return {
+          success: false,
+          error: 'No account found with this email. Please sign up to create a new account.',
+        };
       }
     }
-    await loginWithEmail(email, '123456');
+
+    await loginWithEmail(cleanEmail, '123456');
     return { success: true };
   };
 
@@ -334,13 +353,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     pass: string,
     fullName?: string
   ): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = email.toLowerCase().trim();
+
+    // Check if user already exists
+    const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+    if (existingUser) {
+      return {
+        success: false,
+        error: 'An account with this email address already exists. Please sign in instead.',
+      };
+    }
+
     if (hasSupabase) {
-      const res = await signUpWithSupabasePassword(email, pass, fullName);
+      const res = await signUpWithSupabasePassword(cleanEmail, pass, fullName);
       if (!res.success) {
         return { success: false, error: res.error || 'Sign up failed' };
       }
     }
-    await loginWithEmail(email, '123456', fullName);
+
+    await loginWithEmail(cleanEmail, '123456', fullName);
     return { success: true };
   };
 
