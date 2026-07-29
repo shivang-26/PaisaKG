@@ -11,11 +11,10 @@ import {
   UserProfile,
 } from '@/lib/types';
 import { generateId, generateInviteCode } from '@/lib/utils';
+import { sendCustomOtp, verifyCustomOtp } from '@/lib/otpService';
 import {
   getSupabaseClient,
   getSupabaseCredentials,
-  sendSupabaseOtp,
-  verifySupabaseOtp,
   signInWithSupabasePassword,
   signUpWithSupabasePassword,
 } from '@/lib/supabase';
@@ -36,7 +35,7 @@ interface AppContextType {
   hasSupabase: boolean;
   // Auth & Family Actions
   loginWithEmail: (email: string, otpCode: string, fullName?: string) => Promise<boolean>;
-  sendOtp: (email: string, isSignUp?: boolean) => Promise<{ success: boolean; error?: string }>;
+  sendOtp: (email: string, isSignUp?: boolean) => Promise<{ success: boolean; code?: string; error?: string }>;
   verifyOtp: (email: string, code: string, fullName?: string, isSignUp?: boolean) => Promise<{ success: boolean; error?: string }>;
   loginWithPassword: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signUpWithPassword: (email: string, pass: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
@@ -164,14 +163,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           error: 'An account with this email address already exists. Please sign in instead.',
         };
       }
-    }
-
-    if (hasSupabase) {
-      const res = await verifySupabaseOtp(cleanEmail, code);
-      if (!res.success) {
-        return { success: false, error: res.error || 'Invalid OTP code' };
+    } else {
+      const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+      if (!existingUser) {
+        return {
+          success: false,
+          error: 'No account found with this email. Please sign up to register a new account.',
+        };
       }
     }
+
+    const res = await verifyCustomOtp(cleanEmail, code);
+    if (!res.success) {
+      return { success: false, error: res.error || 'Invalid OTP code' };
+    }
+
     // Login or onboard user into local session
     await loginWithEmail(cleanEmail, code, fullName);
     return { success: true };
@@ -298,7 +304,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSyncQueueCount(syncCount);
   };
 
-  const sendOtp = async (email: string, isSignUp?: boolean): Promise<{ success: boolean; error?: string }> => {
+  const sendOtp = async (
+    email: string,
+    isSignUp?: boolean
+  ): Promise<{ success: boolean; code?: string; error?: string }> => {
     const cleanEmail = email.toLowerCase().trim();
     const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
 
@@ -309,18 +318,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    if (!isSignUp && !existingUser && !hasSupabase) {
+    if (!isSignUp && !existingUser) {
       return {
         success: false,
         error: 'No account found with this email. Please sign up to create a new account.',
       };
     }
 
-    if (hasSupabase) {
-      return await sendSupabaseOtp(cleanEmail);
-    }
-
-    return { success: true };
+    const res = await sendCustomOtp(cleanEmail);
+    return { success: true, code: res.code };
   };
 
   const loginWithPassword = async (

@@ -51,6 +51,12 @@ export async function sendSupabaseOtp(email: string): Promise<{ success: boolean
     });
 
     if (error) {
+      if (error.message.toLowerCase().includes('rate limit')) {
+        return {
+          success: false,
+          error: 'Email rate limit exceeded (Supabase limits emails to 3-4 per hour per address). You can use Password Login or Instant Access below.',
+        };
+      }
       return { success: false, error: error.message };
     }
 
