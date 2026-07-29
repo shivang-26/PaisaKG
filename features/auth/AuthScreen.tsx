@@ -268,14 +268,19 @@ export const AuthScreen: React.FC = () => {
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-[#0a452b] space-y-1">
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-[#0a452b] space-y-1.5">
                   <div className="flex items-center gap-2 font-bold">
                     <CheckCircle2 className="w-4 h-4 text-[#0a452b] shrink-0" />
-                    <span>OTP sent to {email}</span>
+                    <span>Email sent to {email}</span>
                   </div>
-                  <p className="text-[11px] text-slate-700 leading-relaxed pl-6">
-                    📬 Please enter the 6-digit verification code sent to your email address:
-                  </p>
+                  <div className="text-[11px] text-slate-700 leading-relaxed pl-6 space-y-1">
+                    <p>
+                      <strong>Option 1 (Fastest):</strong> Open your email and tap the <strong>&quot;Confirm your email&quot;</strong> link inside to authenticate automatically.
+                    </p>
+                    <p>
+                      <strong>Option 2:</strong> If your email includes a numeric code, enter it below:
+                    </p>
+                  </div>
                 </div>
 
                 <div>

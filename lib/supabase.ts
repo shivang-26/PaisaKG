@@ -41,10 +41,12 @@ export async function sendSupabaseOtp(email: string): Promise<{ success: boolean
   }
 
   try {
+    const redirectUrl = typeof window !== 'undefined' ? window.location.href : undefined;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
+        emailRedirectTo: redirectUrl,
       },
     });
 
