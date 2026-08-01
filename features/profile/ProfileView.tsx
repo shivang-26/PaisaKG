@@ -118,7 +118,7 @@ export const ProfileView: React.FC = () => {
   const activeKeyInfo = getActiveGeminiApiKeyInfo();
 
   return (
-    <div id="profile-page-container" className="py-6 space-y-6 animate-in fade-in duration-200">
+    <div id="profile-page-container" className="py-6 pb-10 space-y-6 animate-in fade-in duration-200">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -44,7 +44,7 @@ function MainApp() {
     <div className="min-h-screen bg-[#e5e9d3] text-[#0d1f15] font-sans transition-colors">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 min-h-[calc(100vh-4rem-4rem)]">
+      <main className="max-w-4xl mx-auto px-4 pb-28 min-h-[calc(100vh-4rem-4rem)]">
         {activeTab === 'dashboard' && (
           <DashboardView
             onOpenScanModal={() => setIsScanModalOpen(true)}
