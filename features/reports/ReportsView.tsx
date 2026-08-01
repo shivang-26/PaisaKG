@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { MonthSelectorBar } from '@/components/MonthSelectorBar';
 import { CATEGORIES } from '@/lib/constants';
 import { exportExpensesCSV, formatAmount } from '@/lib/utils';
 import {
@@ -31,16 +32,14 @@ import {
 } from 'recharts';
 
 export const ReportsView: React.FC = () => {
-  const { expenses, currentFamily, familyMembers } = useApp();
-
-  const currentMonthPrefix = useMemo(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  }, []);
+  const { expenses, currentFamily, familyMembers, selectedMonthFilter, setSelectedMonthFilter } = useApp();
 
   const currentMonthExpenses = useMemo(() => {
-    return expenses.filter((e) => e.expenseDate.startsWith(currentMonthPrefix));
-  }, [expenses, currentMonthPrefix]);
+    return expenses.filter((e) => {
+      if (selectedMonthFilter === 'ALL') return true;
+      return e.expenseDate.startsWith(selectedMonthFilter);
+    });
+  }, [expenses, selectedMonthFilter]);
 
   // Key metrics
   const totalSpent = useMemo(() => {
@@ -95,6 +94,35 @@ export const ReportsView: React.FC = () => {
       .slice(0, 5);
   }, [currentMonthExpenses]);
 
+  // 6-Month Historical Trend Data
+  const monthlyHistoryData = useMemo(() => {
+    const now = new Date();
+    const months: Array<{ key: string; name: string }> = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const name = `${monthNames[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`;
+      months.push({ key, name });
+    }
+
+    const totals: Record<string, number> = {};
+    expenses.forEach((e) => {
+      if (e.expenseDate && e.expenseDate.length >= 7) {
+        const key = e.expenseDate.slice(0, 7);
+        totals[key] = (totals[key] || 0) + e.amount;
+      }
+    });
+
+    return months.map((m) => ({
+      monthKey: m.key,
+      name: m.name,
+      amount: totals[m.key] || 0,
+      isSelected: selectedMonthFilter === m.key,
+    }));
+  }, [expenses, selectedMonthFilter]);
+
   // Daily Spending Trend Data
   const dailyTrendData = useMemo(() => {
     const now = new Date();
@@ -124,23 +152,74 @@ export const ReportsView: React.FC = () => {
   return (
     <div id="reports-view" className="space-y-6 pb-20 pt-2">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-[#0d1f15] tracking-tight">
-            Family Spending Reports
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#0d1f15] tracking-tight">
+            Family Analytics & Reports
           </h1>
           <p className="text-xs text-slate-600 font-medium">
-            Analytics & Export for {currentFamily?.name || 'Workspace'}
+            Month-wise spending breakdown & history for {currentFamily?.name || 'Workspace'}
           </p>
         </div>
 
         <button
           onClick={() => exportExpensesCSV(expenses, currentFamily?.name || 'Family')}
-          className="px-4 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-semibold shadow-md transition-all flex items-center gap-2"
+          className="px-4 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-semibold shadow-md transition-all flex items-center gap-2 self-start sm:self-auto"
         >
           <Download className="w-3.5 h-3.5" />
           Export CSV
         </button>
+      </div>
+
+      {/* Month Navigation Control Bar */}
+      <MonthSelectorBar />
+
+      {/* Monthly Trend Comparison Bar (Past 6 Months) */}
+      <div className="p-5 rounded-[24px] bg-white border border-[#d5dbcb] shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#0d1f15] flex items-center gap-1.5">
+              <BarChart3 className="w-4 h-4 text-[#0a452b]" />
+              Month-by-Month Spending History
+            </h3>
+            <p className="text-[11px] text-slate-500">
+              Click any month bar to filter reports for that specific month
+            </p>
+          </div>
+        </div>
+
+        <div className="h-44 w-full pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={monthlyHistoryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e9d3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#475569' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false} />
+              <Tooltip
+                formatter={(val: any) => [formatAmount(Number(val) || 0, currentFamily?.currency || '₹'), 'Total Spent']}
+                contentStyle={{ borderRadius: '12px', border: '1px solid #d5dbcb', backgroundColor: '#ffffff', fontSize: '12px' }}
+              />
+              <Bar
+                dataKey="amount"
+                fill="#0a452b"
+                radius={[8, 8, 0, 0]}
+                onClick={(entry: any) => {
+                  if (entry && entry.monthKey) {
+                    setSelectedMonthFilter(entry.monthKey);
+                  }
+                }}
+                className="cursor-pointer hover:opacity-85 transition-opacity"
+              >
+                {monthlyHistoryData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.isSelected ? '#15803d' : '#0a452b'}
+                    opacity={entry.isSelected ? 1 : 0.75}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Summary Stat Cards */}

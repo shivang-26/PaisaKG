@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
+import { MonthSelectorBar } from '@/components/MonthSelectorBar';
 import { CATEGORIES } from '@/lib/constants';
 import { Expense, ExpenseCategoryKey } from '@/lib/types';
 import { formatAmount, formatDate } from '@/lib/utils';
@@ -151,7 +152,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-[#0d1f15] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#0d1f15] tracking-tight">
             Family Expense Records
           </h1>
           <p className="text-xs text-slate-600 font-medium">
@@ -177,6 +178,9 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Month Navigation Control Bar */}
+      <MonthSelectorBar />
 
       {/* Search & Filter Bar */}
       <div className="flex items-center gap-2">
@@ -339,19 +343,19 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
 
       {/* EXPENSE DETAIL & EDIT LIGHTBOX MODAL */}
       {selectedExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-[#f2f5e8] rounded-3xl shadow-2xl border border-[#d5dbcb] w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="bg-white rounded-[28px] shadow-2xl border border-slate-100 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="px-5 py-4 border-b border-[#d5dbcb] bg-[#e5e9d3] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-[#0a452b] text-white">
+            <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-[#e5e9d3]/40 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#0d1f15]">
+                  <h3 className="text-base font-extrabold text-[#0d1f15]">
                     {isEditing ? 'Edit Expense' : 'Expense Details'}
                   </h3>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-slate-500">
                     ID: {selectedExpense.id}
                   </p>
                 </div>
@@ -361,9 +365,9 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   onSelectExpense(null);
                   setIsEditing(false);
                 }}
-                className="p-1.5 rounded-full text-slate-500 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/50 transition-colors"
+                className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-all"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 

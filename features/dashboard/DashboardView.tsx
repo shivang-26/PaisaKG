@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { MonthSelectorBar } from '@/components/MonthSelectorBar';
 import { PWAInstallBanner } from '@/components/PWAInstallBanner';
 import { CATEGORIES } from '@/lib/constants';
 import { Expense } from '@/lib/types';
@@ -42,16 +43,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenAddModal,
   onSelectExpense,
 }) => {
-  const { currentUser, currentFamily, familyMembers, expenses, setActiveTab } =
-    useApp();
+  const {
+    currentUser,
+    currentFamily,
+    familyMembers,
+    expenses,
+    setActiveTab,
+    selectedMonthFilter,
+  } = useApp();
 
-  // Calculate current month's expenses
-  const now = new Date();
-  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
-  const currentMonthExpenses = expenses.filter((e) =>
-    e.expenseDate.startsWith(currentMonthStr)
-  );
+  // Filter expenses according to selectedMonthFilter
+  const currentMonthExpenses = expenses.filter((e) => {
+    if (selectedMonthFilter === 'ALL') return true;
+    return e.expenseDate.startsWith(selectedMonthFilter);
+  });
 
   const totalMonthlySpent = currentMonthExpenses.reduce(
     (sum, e) => sum + e.amount,
@@ -96,12 +101,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
   };
 
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-  const formattedMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-
   return (
     <div id="dashboard-view" className="space-y-6 pb-20 pt-4">
       {/* PWA Install Banner */}
@@ -110,12 +109,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Top Header Area */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h2 className="text-slate-600 text-xs sm:text-sm font-medium uppercase tracking-wider mb-1 flex items-center gap-1.5">
-            <Calendar className="w-4 h-4 text-[#0a452b]" /> {formattedMonthYear}
-          </h2>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0d1f15]">
             {currentFamily ? currentFamily.name : 'Family Workspace'}
           </h1>
+          <p className="text-xs text-slate-600">Track and manage your family expenses</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -136,6 +133,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </button>
         </div>
       </header>
+
+      {/* Month Navigation Selector */}
+      <MonthSelectorBar />
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { db, seedInitialData } from '@/lib/db';
 import {
   Expense,
@@ -29,6 +29,11 @@ interface AppContextType {
   syncQueueCount: number;
   activeTab: 'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile';
   setActiveTab: (tab: 'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile') => void;
+  selectedMonthFilter: string; // 'YYYY-MM' or 'ALL'
+  setSelectedMonthFilter: (month: string) => void;
+  availableMonths: Array<{ label: string; value: string }>;
+  goToPreviousMonth: () => void;
+  goToNextMonth: () => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
   // Supabase Status
@@ -74,6 +79,80 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [syncQueueCount, setSyncQueueCount] = useState(0);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile'>('dashboard');
+
+  const getCurrentMonthStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  };
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>(getCurrentMonthStr);
+
+  const availableMonths = useMemo(() => {
+    const monthMap = new Map<string, string>();
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+
+    // Add current month and past 12 calendar months
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      monthMap.set(key, label);
+    }
+
+    // Add any additional month present in expenses
+    expenses.forEach((e) => {
+      if (e.expenseDate && e.expenseDate.length >= 7) {
+        const key = e.expenseDate.slice(0, 7);
+        if (!monthMap.has(key)) {
+          const [yearStr, monthStr] = key.split('-');
+          const year = parseInt(yearStr, 10);
+          const monthIdx = parseInt(monthStr, 10) - 1;
+          if (!isNaN(year) && monthIdx >= 0 && monthIdx < 12) {
+            monthMap.set(key, `${monthNames[monthIdx]} ${year}`);
+          }
+        }
+      }
+    });
+
+    const list = Array.from(monthMap.entries()).map(([key, label]) => ({
+      value: key,
+      label,
+    }));
+
+    list.sort((a, b) => b.value.localeCompare(a.value));
+    return [{ label: 'All Time', value: 'ALL' }, ...list];
+  }, [expenses]);
+
+  const goToPreviousMonth = () => {
+    if (selectedMonthFilter === 'ALL') {
+      setSelectedMonthFilter(getCurrentMonthStr());
+      return;
+    }
+    const parts = selectedMonthFilter.split('-');
+    if (parts.length < 2) return;
+    let year = parseInt(parts[0], 10);
+    let month = parseInt(parts[1], 10) - 1; // 0-indexed for Date constructor
+    const prevDate = new Date(year, month - 1, 1);
+    const prevKey = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+    setSelectedMonthFilter(prevKey);
+  };
+
+  const goToNextMonth = () => {
+    if (selectedMonthFilter === 'ALL') {
+      setSelectedMonthFilter(getCurrentMonthStr());
+      return;
+    }
+    const parts = selectedMonthFilter.split('-');
+    if (parts.length < 2) return;
+    let year = parseInt(parts[0], 10);
+    let month = parseInt(parts[1], 10) - 1;
+    const nextDate = new Date(year, month + 1, 1);
+    const nextKey = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}`;
+    setSelectedMonthFilter(nextKey);
+  };
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') === 'dark';
@@ -735,6 +814,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         syncQueueCount,
         activeTab,
         setActiveTab,
+        selectedMonthFilter,
+        setSelectedMonthFilter,
+        availableMonths,
+        goToPreviousMonth,
+        goToNextMonth,
         darkMode,
         toggleDarkMode,
         hasSupabase,

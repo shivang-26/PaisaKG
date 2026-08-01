@@ -96,10 +96,10 @@ export const Navbar: React.FC = () => {
               {showMemberMenu && (
                 <div
                   id="user-persona-dropdown"
-                  className="absolute right-0 mt-2 w-64 bg-[#f2f5e8] rounded-2xl shadow-xl border border-[#d5dbcb] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                  className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/90 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 ring-1 ring-black/5"
                 >
-                  <div className="px-3 py-2 border-b border-[#d5dbcb]">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                  <div className="px-3 py-2 border-b border-slate-100">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                       Switch Family Member
                     </p>
                     <p className="text-xs font-bold text-[#0d1f15] truncate">
@@ -107,7 +107,7 @@ export const Navbar: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="py-1 max-h-56 overflow-y-auto">
+                  <div className="py-1 max-h-56 overflow-y-auto space-y-0.5">
                     {familyMembers.map((m) => (
                       <button
                         key={m.userId}
@@ -115,15 +115,17 @@ export const Navbar: React.FC = () => {
                           switchActiveUser(m.userId);
                           setShowMemberMenu(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#e5e9d3] transition-colors ${
-                          m.userId === currentUser.id ? 'bg-[#e5e9d3] text-[#0a452b] font-bold' : 'text-[#0d1f15]'
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all ${
+                          m.userId === currentUser.id
+                            ? 'bg-[#e5e9d3]/80 text-[#0a452b] font-bold'
+                            : 'text-[#0d1f15] hover:bg-slate-100/80'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <img
                             src={m.avatarUrl || 'https://picsum.photos/100'}
                             alt={m.fullName}
-                            className="w-7 h-7 rounded-full object-cover"
+                            className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200"
                           />
                           <div>
                             <p className="text-xs font-semibold leading-tight">{m.fullName}</p>
@@ -137,7 +139,7 @@ export const Navbar: React.FC = () => {
                     ))}
                   </div>
 
-                  <div className="border-t border-[#d5dbcb] pt-1 mt-1 px-2 space-y-0.5">
+                  <div className="border-t border-slate-100 pt-1 mt-1 px-1 space-y-0.5">
                     <button
                       onClick={() => {
                         setActiveTab('profile');

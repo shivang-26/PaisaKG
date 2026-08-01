@@ -182,19 +182,19 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#f2f5e8] rounded-3xl shadow-2xl border border-[#d5dbcb] w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-[28px] shadow-2xl border border-slate-100 w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#d5dbcb] flex items-center justify-between bg-[#e5e9d3]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-[#e5e9d3]/40">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
               <ScanLine className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[#0d1f15]">
+              <h2 className="text-base font-extrabold text-[#0d1f15]">
                 Scan Receipt with AI OCR
               </h2>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-500">
                 Auto-extract total, merchant, date & line items
               </p>
             </div>
@@ -204,9 +204,9 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
               onClose();
               resetModal();
             }}
-            className="p-1.5 rounded-full text-slate-500 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/50 transition-colors"
+            className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-all"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 

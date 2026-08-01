@@ -105,20 +105,20 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#f2f5e8] rounded-3xl shadow-2xl border border-[#d5dbcb] w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-white rounded-[28px] shadow-2xl border border-slate-100 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#d5dbcb] flex items-center justify-between bg-[#e5e9d3]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-[#e5e9d3]/40">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
               <PlusCircle className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[#0d1f15]">
-                Add Manual Expense
+              <h2 className="text-base font-extrabold text-[#0d1f15]">
+                Add Expense
               </h2>
-              <p className="text-xs text-slate-600">
-                Log expense to family workspace
+              <p className="text-xs text-slate-500">
+                Log manual expense to family workspace
               </p>
             </div>
           </div>
@@ -127,14 +127,14 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               onClose();
               resetForm();
             }}
-            className="p-1.5 rounded-full text-slate-500 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/50 transition-colors"
+            className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-all"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto flex-1 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-4">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
@@ -143,7 +143,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
           )}
 
           {/* Amount Box */}
-          <div className="bg-[#e5e9d3] p-4 rounded-2xl border border-[#d5dbcb]">
+          <div className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80">
             <label className="block text-xs font-bold uppercase tracking-wide text-[#0a452b] mb-1">
               Amount (₹) *
             </label>
@@ -158,7 +158,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
                 placeholder="0.00"
-                className="w-full pl-9 pr-4 py-2 text-2xl font-black bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                className="w-full pl-9 pr-4 py-2 text-2xl font-black bg-white border border-slate-200 rounded-xl text-[#0d1f15] focus:outline-none focus:ring-4 focus:ring-[#0a452b]/10 focus:border-[#0a452b] transition-all"
               />
             </div>
           </div>
@@ -175,7 +175,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                 value={merchant}
                 onChange={(e) => setMerchant(e.target.value)}
                 placeholder="e.g. Reliance Fresh"
-                className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl text-[#0d1f15] focus:outline-none focus:ring-4 focus:ring-[#0a452b]/10 focus:border-[#0a452b] transition-all"
               />
             </div>
 
@@ -187,7 +187,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ExpenseCategoryKey)}
-                className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl text-[#0d1f15] focus:outline-none focus:ring-4 focus:ring-[#0a452b]/10 focus:border-[#0a452b] transition-all"
               >
                 {Object.values(CATEGORIES).map((cat) => (
                   <option key={cat.key} value={cat.key}>
@@ -207,7 +207,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                 required
                 value={expenseDate}
                 onChange={(e) => setExpenseDate(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl text-[#0d1f15] focus:outline-none focus:ring-4 focus:ring-[#0a452b]/10 focus:border-[#0a452b] transition-all"
               />
             </div>
 
@@ -219,7 +219,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               <select
                 value={paidByUserId}
                 onChange={(e) => setPaidByUserId(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl text-[#0d1f15] focus:outline-none focus:ring-4 focus:ring-[#0a452b]/10 focus:border-[#0a452b] transition-all"
               >
                 {familyMembers.map((m) => (
                   <option key={m.userId} value={m.userId}>
@@ -240,7 +240,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Monthly milk, veggies and snacks"
-              className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+              className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl text-[#0d1f15] focus:outline-none focus:ring-4 focus:ring-[#0a452b]/10 focus:border-[#0a452b] transition-all"
             />
           </div>
 
@@ -250,18 +250,18 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               Receipt Photo (Optional)
             </label>
             {receiptImage ? (
-              <div className="relative w-32 h-24 rounded-2xl overflow-hidden border border-[#d5dbcb]">
+              <div className="relative w-32 h-24 rounded-2xl overflow-hidden border border-slate-200 shadow-xs">
                 <img src={receiptImage} alt="Receipt preview" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setReceiptImage(null)}
-                  className="absolute top-1 right-1 p-1 bg-black/60 text-white rounded-full"
+                  className="absolute top-1.5 right-1.5 p-1 bg-black/60 text-white rounded-full hover:bg-black transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
-              <label className="flex items-center gap-2 p-3 border border-dashed border-[#d5dbcb] rounded-xl cursor-pointer hover:bg-[#e5e9d3] transition-colors">
+              <label className="flex items-center gap-2.5 p-3.5 border border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
                 <Upload className="w-4 h-4 text-slate-500" />
                 <span className="text-xs text-slate-700 font-medium">
                   Attach receipt picture
@@ -284,7 +284,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                 onClose();
                 resetForm();
               }}
-              className="px-4 py-2.5 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 hover:bg-[#e5e9d3] transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
             >
               Cancel
             </button>
