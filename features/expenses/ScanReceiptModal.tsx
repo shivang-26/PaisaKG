@@ -18,6 +18,7 @@ import {
   Image as ImageIcon,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   Receipt,
   Eye,
   Key,
@@ -25,21 +26,28 @@ import {
 
 interface ScanReceiptModalProps {
   isOpen: boolean;
-  onClose: () => void;
   initialMode?: 'camera' | 'gallery';
+  onClose: () => void;
 }
 
 export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   isOpen,
-  onClose,
   initialMode = 'camera',
+  onClose,
 }) => {
   const { currentUser, familyMembers, addExpense, getActiveGeminiApiKeyInfo, setActiveTab } = useApp();
 
-  const [step, setStep] = useState<'upload' | 'scanning' | 'review'>('upload');
+  const [step, setStep] = useState<'camera' | 'gallery' | 'scanning' | 'review'>(initialMode);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Live Camera state & refs
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoStreamRef = useRef<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevIsOpenRef = useRef<boolean>(false);
 
   // Review Editable State
   const [merchant, setMerchant] = useState('');
@@ -53,94 +61,140 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   const [items, setItems] = useState<OCRItemResult[]>([]);
   const [showEnlargedImage, setShowEnlargedImage] = useState(false);
 
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const stopCamera = React.useCallback(() => {
+    if (videoStreamRef.current) {
+      videoStreamRef.current.getTracks().forEach((track) => track.stop());
+      videoStreamRef.current = null;
+    }
+  }, []);
 
-  // Auto trigger camera or gallery file input directly when modal opens in upload step
+  const startCamera = React.useCallback(async () => {
+    stopCamera();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      });
+      videoStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setCameraError(false);
+    } catch (err) {
+      console.warn('Camera access error or unsupported:', err);
+      setCameraError(true);
+    }
+  }, [stopCamera]);
+
+  const processOCR = React.useCallback(
+    async (imageBase64: string) => {
+      setStep('scanning');
+      setIsScanning(true);
+      setErrorMsg(null);
+
+      try {
+        const activeKeyInfo = getActiveGeminiApiKeyInfo();
+        const res = await fetch('/api/ocr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64,
+            apiKey: activeKeyInfo.key,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to analyze receipt');
+        }
+
+        // Populate review form with OCR findings
+        const ocr: OCRResult = data;
+        setMerchant(ocr.merchant || 'Store Merchant');
+        setAmount(ocr.totalAmount || 0);
+        setCategory(
+          (CATEGORIES[ocr.category]?.key as ExpenseCategoryKey) || 'Groceries'
+        );
+
+        const validDate = ocr.date && !isNaN(new Date(ocr.date).getTime())
+          ? ocr.date
+          : new Date().toISOString().slice(0, 10);
+        setExpenseDate(validDate);
+
+        setConfidenceScore(ocr.confidenceScore || 85);
+        setConfidenceNotes(ocr.confidenceNotes || '');
+        setItems(ocr.items || []);
+        setNotes(
+          ocr.receiptNumber
+            ? `Receipt #${ocr.receiptNumber}`
+            : 'Scanned via Gemini Vision OCR'
+        );
+
+        setStep('review');
+      } catch (err: any) {
+        console.error('OCR scan failed:', err);
+        // Fallback with defaults for user manual review
+        setMerchant('Grocery / Store');
+        setAmount(500);
+        setCategory('Groceries');
+        setExpenseDate(new Date().toISOString().slice(0, 10));
+        setConfidenceScore(45);
+        setConfidenceNotes('Could not automatically parse receipt. Please verify fields.');
+        setStep('review');
+      } finally {
+        setIsScanning(false);
+      }
+    },
+    [getActiveGeminiApiKeyInfo]
+  );
+
+  // Handle modal open/close state transitions cleanly
   React.useEffect(() => {
-    if (isOpen && step === 'upload' && !selectedImage) {
+    if (isOpen && !prevIsOpenRef.current) {
       const timer = setTimeout(() => {
+        setStep(initialMode);
         if (initialMode === 'gallery') {
-          galleryInputRef.current?.click();
+          stopCamera();
+          fileInputRef.current?.click();
         } else {
-          cameraInputRef.current?.click();
+          startCamera();
         }
       }, 50);
       return () => clearTimeout(timer);
+    } else if (!isOpen && prevIsOpenRef.current) {
+      stopCamera();
     }
-  }, [isOpen, step, selectedImage, initialMode]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, initialMode, startCamera, stopCamera]);
 
   if (!isOpen) return null;
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      stopCamera();
+      setSelectedImage(dataUrl);
+      processOCR(dataUrl);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       const base64 = await compressImage(file, 1000);
+      stopCamera();
       setSelectedImage(base64);
       processOCR(base64);
     } catch (err) {
-      setErrorMsg('Failed to process receipt image');
-    }
-  };
-
-  const processOCR = async (imageBase64: string) => {
-    setStep('scanning');
-    setIsScanning(true);
-    setErrorMsg(null);
-
-    try {
-      const activeKeyInfo = getActiveGeminiApiKeyInfo();
-      const res = await fetch('/api/ocr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64,
-          apiKey: activeKeyInfo.key,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to analyze receipt');
-      }
-
-      // Populate review form with OCR findings
-      const ocr: OCRResult = data;
-      setMerchant(ocr.merchant || 'Store Merchant');
-      setAmount(ocr.totalAmount || 0);
-      setCategory(
-        (CATEGORIES[ocr.category]?.key as ExpenseCategoryKey) || 'Groceries'
-      );
-
-      const validDate = ocr.date && !isNaN(new Date(ocr.date).getTime())
-        ? ocr.date
-        : new Date().toISOString().slice(0, 10);
-      setExpenseDate(validDate);
-
-      setConfidenceScore(ocr.confidenceScore || 85);
-      setConfidenceNotes(ocr.confidenceNotes || '');
-      setItems(ocr.items || []);
-      setNotes(
-        ocr.receiptNumber
-          ? `Receipt #${ocr.receiptNumber}`
-          : 'Scanned via Gemini Vision OCR'
-      );
-
-      setStep('review');
-    } catch (err: any) {
-      console.error('OCR scan failed:', err);
-      // Fallback with defaults for user manual review
-      setMerchant('Grocery / Store');
-      setAmount(500);
-      setCategory('Groceries');
-      setExpenseDate(new Date().toISOString().slice(0, 10));
-      setConfidenceScore(45);
-      setConfidenceNotes('Could not automatically parse receipt. Please verify fields.');
-      setStep('review');
-    } finally {
-      setIsScanning(false);
+      setErrorMsg('Failed to process image file');
     }
   };
 
@@ -179,7 +233,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   };
 
   const resetModal = () => {
-    setStep('upload');
+    setStep('scanning');
     setSelectedImage(null);
     setErrorMsg(null);
     setMerchant('');
@@ -188,36 +242,52 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-[28px] shadow-2xl border border-slate-100 w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-[#e5e9d3]/40">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
-              <ScanLine className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-extrabold text-[#0d1f15]">
-                Scan Receipt with AI OCR
-              </h2>
-              <p className="text-xs text-slate-500">
-                Auto-extract total, merchant, date & line items
-              </p>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+      {/* Top Header Bar */}
+      <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+        <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => {
+              stopCamera();
               onClose();
               resetModal();
             }}
-            className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-all"
+            className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+            title="Go Back"
           >
-            <X className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+              <ScanLine className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                Scan Receipt with AI OCR
+              </h2>
+              <p className="text-[11px] text-slate-500">
+                Instant bill & line-item extraction
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Modal Content Body */}
-        <div className="p-5 overflow-y-auto flex-1">
+        <button
+          type="button"
+          onClick={() => {
+            stopCamera();
+            onClose();
+            resetModal();
+          }}
+          className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Main Full-Page Content */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-2xl mx-auto w-full">
           {/* Active Gemini Key Status Banner */}
           {(() => {
             const activeKeyInfo = getActiveGeminiApiKeyInfo();
@@ -273,51 +343,149 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
             </div>
           )}
 
-          {/* STEP 1: UPLOAD / CAMERA */}
-          {step === 'upload' && (
+          {/* STEP 1: LIVE CAMERA VIEW */}
+          {step === 'camera' && (
+            <div className="space-y-4">
+              <div className="relative rounded-2xl overflow-hidden bg-slate-950 border-2 border-[#0a452b] shadow-lg flex flex-col items-center justify-center min-h-[260px] sm:min-h-[300px]">
+                {!cameraError ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-[260px] sm:h-[300px] object-cover"
+                    />
+                    {/* Camera Viewfinder Overlay Frame */}
+                    <div className="absolute inset-4 sm:inset-6 border-2 border-dashed border-white/60 rounded-xl pointer-events-none flex items-center justify-center">
+                      <span className="bg-black/40 text-white/90 text-[10px] font-medium px-2.5 py-1 rounded-full backdrop-blur-xs">
+                        Align Receipt within Frame
+                      </span>
+                    </div>
+
+                    {/* Bottom Action bar over camera */}
+                    <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-3 px-4">
+                      <button
+                        type="button"
+                        onClick={capturePhoto}
+                        className="px-6 py-2.5 rounded-full bg-[#0a452b] hover:bg-[#062c1b] text-white font-bold text-xs shadow-xl flex items-center gap-2 border border-emerald-400/30 transition-all transform active:scale-95"
+                      >
+                        <Camera className="w-4 h-4" />
+                        Snap Photo Now
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          stopCamera();
+                          setStep('gallery');
+                          fileInputRef.current?.click();
+                        }}
+                        className="p-2.5 rounded-full bg-white/90 hover:bg-white text-slate-800 text-xs font-bold shadow-md transition-all backdrop-blur-xs"
+                        title="Upload from Gallery instead"
+                      >
+                        <Upload className="w-4 h-4 text-[#0a452b]" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-6 text-center text-white space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto">
+                      <Camera className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Camera Access Unavailable</h4>
+                      <p className="text-xs text-slate-400 max-w-xs mx-auto mt-1">
+                        Live video stream is restricted or not permitted on this browser. You can select a receipt photo file directly.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-5 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-md transition-all inline-flex items-center gap-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Select Receipt Image File
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick toggle bar */}
+              <div className="flex items-center justify-between text-xs px-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    stopCamera();
+                    setStep('gallery');
+                    fileInputRef.current?.click();
+                  }}
+                  className="font-semibold text-[#0a452b] hover:underline flex items-center gap-1.5"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  Upload from Gallery instead
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-slate-500 hover:text-slate-800 font-medium"
+                >
+                  Choose File...
+                </button>
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+          )}
+
+          {/* STEP 2: GALLERY UPLOAD */}
+          {step === 'gallery' && (
             <div className="space-y-4">
               <div className="border-2 border-dashed border-[#0a452b]/40 bg-[#e5e9d3] rounded-3xl p-6 sm:p-8 text-center transition-all">
                 <div className="w-16 h-16 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center mx-auto mb-3 shadow-md">
-                  <Camera className="w-8 h-8" />
+                  <Upload className="w-8 h-8" />
                 </div>
                 <h3 className="text-base font-bold text-[#0d1f15] mb-1">
-                  Snap or Upload Receipt
+                  Upload Receipt Image
                 </h3>
                 <p className="text-xs text-slate-600 max-w-xs mx-auto mb-5">
-                  Opening camera to scan your receipt directly, or choose a picture from your gallery.
+                  Select a picture of your bill or receipt from your device gallery or files.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                   <button
-                    onClick={() => cameraInputRef.current?.click()}
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
                     className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2"
                   >
-                    <Camera className="w-4 h-4" />
-                    Open Camera (Snap)
+                    <Upload className="w-4 h-4" />
+                    Browse Device Files
                   </button>
 
                   <button
-                    onClick={() => galleryInputRef.current?.click()}
+                    type="button"
+                    onClick={() => {
+                      setStep('camera');
+                      startCamera();
+                    }}
                     className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white hover:bg-slate-50 text-[#0d1f15] text-xs font-bold border border-[#d5dbcb] shadow-sm transition-all flex items-center justify-center gap-2"
                   >
-                    <Upload className="w-4 h-4 text-[#0a452b]" />
-                    Upload from Gallery
+                    <Camera className="w-4 h-4 text-[#0a452b]" />
+                    Switch to Live Camera
                   </button>
                 </div>
 
-                {/* Hidden input for Camera capture */}
+                {/* Hidden input for File selection */}
                 <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-
-                {/* Hidden input for Gallery file selection */}
-                <input
-                  ref={galleryInputRef}
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
@@ -332,6 +500,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
+                    type="button"
                     onClick={() => {
                       const sample1 = 'https://picsum.photos/seed/sample_receipt_groceries/600/900';
                       setSelectedImage(sample1);
@@ -346,6 +515,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                     </div>
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       const sample2 = 'https://picsum.photos/seed/sample_receipt_restaurant/600/900';
                       setSelectedImage(sample2);
@@ -364,7 +534,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
             </div>
           )}
 
-          {/* STEP 2: OCR SCANNING ANIMATION */}
+          {/* STEP 3: OCR SCANNING ANIMATION */}
           {step === 'scanning' && (
             <div className="py-12 text-center space-y-4">
               <div className="relative w-48 h-64 mx-auto rounded-2xl overflow-hidden border-2 border-[#0a452b] shadow-xl">
@@ -600,8 +770,12 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
           {step === 'review' ? (
             <>
               <button
-                onClick={() => setStep('upload')}
-                className="px-4 py-2.5 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 hover:bg-[#f2f5e8] transition-colors flex items-center gap-1.5"
+                type="button"
+                onClick={() => {
+                  setStep('camera');
+                  startCamera();
+                }}
+                className="px-3.5 py-2.5 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 hover:bg-[#f2f5e8] transition-colors flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Retake
@@ -626,7 +800,6 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
             </button>
           )}
         </div>
-      </div>
 
       {/* Enlarged Receipt Photo Lightbox */}
       {showEnlargedImage && selectedImage && (

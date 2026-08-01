@@ -84,7 +84,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   };
-  const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>(getCurrentMonthStr);
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>('ALL');
 
   const availableMonths = useMemo(() => {
     const monthMap = new Map<string, string>();

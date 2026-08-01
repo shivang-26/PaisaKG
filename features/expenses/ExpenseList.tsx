@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { MonthSelectorBar } from '@/components/MonthSelectorBar';
 import { CATEGORIES } from '@/lib/constants';
 import { Expense, ExpenseCategoryKey } from '@/lib/types';
 import { formatAmount, formatDate } from '@/lib/utils';
@@ -178,9 +177,6 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
           </button>
         </div>
       </div>
-
-      {/* Month Navigation Control Bar */}
-      <MonthSelectorBar />
 
       {/* Search & Filter Bar */}
       <div className="flex items-center gap-2">

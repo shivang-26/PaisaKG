@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { MonthSelectorBar } from '@/components/MonthSelectorBar';
 import { CATEGORIES } from '@/lib/constants';
 import { exportExpensesCSV, formatAmount } from '@/lib/utils';
 import {
@@ -170,9 +169,6 @@ export const ReportsView: React.FC = () => {
           Export CSV
         </button>
       </div>
-
-      {/* Month Navigation Control Bar */}
-      <MonthSelectorBar />
 
       {/* Monthly Trend Comparison Bar (Past 6 Months) */}
       <div className="p-5 rounded-[24px] bg-white border border-[#d5dbcb] shadow-sm space-y-3">

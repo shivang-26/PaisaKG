@@ -17,6 +17,7 @@ import {
   Tag,
   Store,
   User,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface AddExpenseModalProps {
@@ -105,36 +106,50 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white rounded-[28px] shadow-2xl border border-slate-100 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-[#e5e9d3]/40">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
-              <PlusCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-extrabold text-[#0d1f15]">
-                Add Expense
-              </h2>
-              <p className="text-xs text-slate-500">
-                Log manual expense to family workspace
-              </p>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+      {/* Top Header Bar */}
+      <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+        <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => {
               onClose();
               resetForm();
             }}
-            className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-all"
+            className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+            title="Go Back"
           >
-            <X className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+              <PlusCircle className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                Add New Expense
+              </h2>
+              <p className="text-[11px] text-slate-500">
+                Log manual transaction to family workspace
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-4">
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            resetForm();
+          }}
+          className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Main Full-Page Form */}
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full space-y-4">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
@@ -298,7 +313,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
             </button>
           </div>
         </form>
-      </div>
     </div>
   );
 };

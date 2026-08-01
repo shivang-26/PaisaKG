@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { MonthSelectorBar } from '@/components/MonthSelectorBar';
 import { PWAInstallBanner } from '@/components/PWAInstallBanner';
 import { CATEGORIES } from '@/lib/constants';
 import { Expense } from '@/lib/types';
@@ -133,9 +132,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </button>
         </div>
       </header>
-
-      {/* Month Navigation Selector */}
-      <MonthSelectorBar />
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">

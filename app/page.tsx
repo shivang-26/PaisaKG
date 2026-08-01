@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { AppProvider, useApp } from '@/context/AppContext';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
@@ -13,20 +13,24 @@ import { ReportsView } from '@/features/reports/ReportsView';
 import { FamilyManagerView } from '@/features/family/FamilyManagerView';
 import { ProfileView } from '@/features/profile/ProfileView';
 import { Expense } from '@/lib/types';
+import { compressImage } from '@/lib/utils';
 import { RefreshCw } from 'lucide-react';
 
 function MainApp() {
   const { currentUser, isLoading, activeTab, setActiveTab } = useApp();
 
-  const [scanModalConfig, setScanModalConfig] = useState<{ isOpen: boolean; mode: 'camera' | 'gallery' }>({
+  const [scanModalConfig, setScanModalConfig] = useState<{
+    isOpen: boolean;
+    initialMode: 'camera' | 'gallery';
+  }>({
     isOpen: false,
-    mode: 'camera',
+    initialMode: 'camera',
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
   const handleOpenScanModal = (mode: 'camera' | 'gallery' = 'camera') => {
-    setScanModalConfig({ isOpen: true, mode });
+    setScanModalConfig({ isOpen: true, initialMode: mode });
   };
 
   if (isLoading) {
@@ -84,8 +88,10 @@ function MainApp() {
       {/* Flagship OCR Receipt Scan Modal */}
       <ScanReceiptModal
         isOpen={scanModalConfig.isOpen}
-        initialMode={scanModalConfig.mode}
-        onClose={() => setScanModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        initialMode={scanModalConfig.initialMode}
+        onClose={() =>
+          setScanModalConfig((prev) => ({ ...prev, isOpen: false }))
+        }
       />
 
       {/* Manual Add Expense Modal */}
