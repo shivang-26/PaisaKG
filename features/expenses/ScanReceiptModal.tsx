@@ -26,11 +26,13 @@ import {
 interface ScanReceiptModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialMode?: 'camera' | 'gallery';
 }
 
 export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   isOpen,
   onClose,
+  initialMode = 'camera',
 }) => {
   const { currentUser, familyMembers, addExpense, getActiveGeminiApiKeyInfo, setActiveTab } = useApp();
 
@@ -54,15 +56,19 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto trigger camera when modal opens in upload step
+  // Auto trigger camera or gallery file input directly when modal opens in upload step
   React.useEffect(() => {
     if (isOpen && step === 'upload' && !selectedImage) {
       const timer = setTimeout(() => {
-        cameraInputRef.current?.click();
-      }, 200);
+        if (initialMode === 'gallery') {
+          galleryInputRef.current?.click();
+        } else {
+          cameraInputRef.current?.click();
+        }
+      }, 50);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, step, selectedImage]);
+  }, [isOpen, step, selectedImage, initialMode]);
 
   if (!isOpen) return null;
 

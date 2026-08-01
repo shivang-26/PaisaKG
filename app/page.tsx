@@ -18,9 +18,16 @@ import { RefreshCw } from 'lucide-react';
 function MainApp() {
   const { currentUser, isLoading, activeTab, setActiveTab } = useApp();
 
-  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
+  const [scanModalConfig, setScanModalConfig] = useState<{ isOpen: boolean; mode: 'camera' | 'gallery' }>({
+    isOpen: false,
+    mode: 'camera',
+  });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+
+  const handleOpenScanModal = (mode: 'camera' | 'gallery' = 'camera') => {
+    setScanModalConfig({ isOpen: true, mode });
+  };
 
   if (isLoading) {
     return (
@@ -47,7 +54,7 @@ function MainApp() {
       <main className="max-w-4xl mx-auto px-4 pb-28 min-h-[calc(100vh-4rem-4rem)]">
         {activeTab === 'dashboard' && (
           <DashboardView
-            onOpenScanModal={() => setIsScanModalOpen(true)}
+            onOpenScanModal={handleOpenScanModal}
             onOpenAddModal={() => setIsAddModalOpen(true)}
             onSelectExpense={(expense) => {
               setSelectedExpense(expense);
@@ -61,7 +68,7 @@ function MainApp() {
             selectedExpense={selectedExpense}
             onSelectExpense={setSelectedExpense}
             onOpenAddModal={() => setIsAddModalOpen(true)}
-            onOpenScanModal={() => setIsScanModalOpen(true)}
+            onOpenScanModal={handleOpenScanModal}
           />
         )}
 
@@ -72,12 +79,13 @@ function MainApp() {
         {activeTab === 'profile' && <ProfileView />}
       </main>
 
-      <BottomNav onOpenScanModal={() => setIsScanModalOpen(true)} />
+      <BottomNav onOpenScanModal={() => handleOpenScanModal('camera')} />
 
       {/* Flagship OCR Receipt Scan Modal */}
       <ScanReceiptModal
-        isOpen={isScanModalOpen}
-        onClose={() => setIsScanModalOpen(false)}
+        isOpen={scanModalConfig.isOpen}
+        initialMode={scanModalConfig.mode}
+        onClose={() => setScanModalConfig((prev) => ({ ...prev, isOpen: false }))}
       />
 
       {/* Manual Add Expense Modal */}

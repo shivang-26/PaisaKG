@@ -36,7 +36,7 @@ interface ExpenseListProps {
   selectedExpense: Expense | null;
   onSelectExpense: (expense: Expense | null) => void;
   onOpenAddModal: () => void;
-  onOpenScanModal: () => void;
+  onOpenScanModal: (mode?: 'camera' | 'gallery') => void;
 }
 
 export const ExpenseList: React.FC<ExpenseListProps> = ({
@@ -165,7 +165,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
 
         <div className="flex items-center gap-2">
           <button
-            onClick={onOpenScanModal}
+            onClick={() => onOpenScanModal('camera')}
             className="px-4 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-semibold shadow-md transition-all flex items-center gap-2"
           >
             <Sparkles className="w-3.5 h-3.5" /> Scan Receipt

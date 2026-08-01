@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 
 interface DashboardViewProps {
-  onOpenScanModal: () => void;
+  onOpenScanModal: (mode?: 'camera' | 'gallery') => void;
   onOpenAddModal: () => void;
   onSelectExpense: (expense: Expense) => void;
 }
@@ -117,7 +117,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             id="dashboard-header-upload-btn"
-            onClick={onOpenScanModal}
+            onClick={() => onOpenScanModal('gallery')}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#f2f5e8] border border-[#d5dbcb] px-4 py-2.5 rounded-xl text-sm font-semibold text-[#0a452b] shadow-sm hover:bg-white transition-colors"
           >
             <Upload className="w-4 h-4 text-[#0a452b]" />
@@ -186,7 +186,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Upload Receipt Banner */}
       <div
         id="dashboard-upload-receipt-card"
-        onClick={onOpenScanModal}
+        onClick={() => onOpenScanModal('gallery')}
         className="bg-gradient-to-r from-[#0a452b] via-[#0e5234] to-[#0a452b] p-5 sm:p-6 rounded-[24px] text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer hover:shadow-lg transition-all group border border-[#0d1f15]/20"
       >
         <div className="flex items-center gap-4 text-center sm:text-left">
@@ -205,7 +205,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onOpenScanModal();
+            onOpenScanModal('gallery');
           }}
           className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white text-[#0a452b] font-extrabold text-xs sm:text-sm shadow-sm hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2 shrink-0"
         >
@@ -276,7 +276,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <p className="text-sm font-bold text-[#0d1f15]">No expenses recorded yet</p>
                 <p className="text-xs text-slate-600 mb-4">Start by uploading a receipt or logging manually.</p>
                 <button
-                  onClick={onOpenScanModal}
+                  onClick={() => onOpenScanModal('gallery')}
                   className="px-4 py-2 rounded-xl bg-[#0a452b] text-white text-xs font-bold shadow-sm hover:bg-[#07331f]"
                 >
                   Upload First Receipt

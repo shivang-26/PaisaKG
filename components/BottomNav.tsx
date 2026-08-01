@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 interface BottomNavProps {
-  onOpenScanModal: () => void;
+  onOpenScanModal: (mode?: 'camera' | 'gallery') => void;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ onOpenScanModal }) => {
@@ -58,7 +58,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenScanModal }) => {
               <div key={tab.id} className="relative -top-5">
                 <button
                   id="bottom-nav-scan-btn"
-                  onClick={onOpenScanModal}
+                  onClick={() => onOpenScanModal('camera')}
                   className="w-14 h-14 rounded-full bg-[#0a452b] text-white flex flex-col items-center justify-center shadow-lg hover:bg-[#07331f] hover:scale-105 active:scale-95 transition-all ring-4 ring-[#e5e9d3]"
                   aria-label="Scan Receipt"
                 >
