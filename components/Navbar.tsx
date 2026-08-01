@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Logo } from '@/components/Logo';
 import {
-  Users,
   Moon,
   Sun,
   Wifi,
@@ -13,6 +12,8 @@ import {
   ShieldCheck,
   UserCheck,
   Sparkles,
+  User,
+  LogOut,
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -26,6 +27,7 @@ export const Navbar: React.FC = () => {
     toggleDarkMode,
     switchActiveUser,
     setActiveTab,
+    logout,
   } = useApp();
 
   const [showMemberMenu, setShowMemberMenu] = useState(false);
@@ -135,16 +137,26 @@ export const Navbar: React.FC = () => {
                     ))}
                   </div>
 
-                  <div className="border-t border-[#d5dbcb] pt-1 mt-1 px-2">
+                  <div className="border-t border-[#d5dbcb] pt-1 mt-1 px-2 space-y-0.5">
                     <button
                       onClick={() => {
-                        setActiveTab('family');
+                        setActiveTab('profile');
                         setShowMemberMenu(false);
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-[#0a452b] hover:bg-[#e5e9d3] rounded-xl transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-[#0d1f15] hover:bg-[#e5e9d3] rounded-xl transition-colors"
                     >
-                      <Users className="w-4 h-4 text-[#0a452b]" />
-                      Manage Family Workspace
+                      <User className="w-4 h-4 text-[#0a452b]" />
+                      My Profile Page
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMemberMenu(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 rounded-xl transition-colors"
+                    >
+                      <LogOut className="w-4 h-4 text-rose-600" />
+                      Log Out
                     </button>
                   </div>
                 </div>

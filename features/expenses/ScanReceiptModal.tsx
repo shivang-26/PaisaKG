@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Receipt,
   Eye,
+  Key,
 } from 'lucide-react';
 
 interface ScanReceiptModalProps {
@@ -31,7 +32,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { currentUser, familyMembers, addExpense } = useApp();
+  const { currentUser, familyMembers, addExpense, getActiveGeminiApiKeyInfo, setActiveTab } = useApp();
 
   const [step, setStep] = useState<'upload' | 'scanning' | 'review'>('upload');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -83,10 +84,14 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
     setErrorMsg(null);
 
     try {
+      const activeKeyInfo = getActiveGeminiApiKeyInfo();
       const res = await fetch('/api/ocr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64 }),
+        body: JSON.stringify({
+          imageBase64,
+          apiKey: activeKeyInfo.key,
+        }),
       });
 
       const data = await res.json();
@@ -207,6 +212,54 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
 
         {/* Modal Content Body */}
         <div className="p-5 overflow-y-auto flex-1">
+          {/* Active Gemini Key Status Banner */}
+          {(() => {
+            const activeKeyInfo = getActiveGeminiApiKeyInfo();
+            if (activeKeyInfo.source === 'none') {
+              return (
+                <div className="mb-4 p-3 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs shadow-xs">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                    <span className="font-semibold text-amber-900">
+                      No Gemini API key set. Please configure your Personal or Family key.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      setActiveTab('family');
+                    }}
+                    className="px-2.5 py-1 rounded-xl bg-amber-800 text-white font-bold text-[11px] hover:bg-amber-900 shrink-0 self-end sm:self-auto"
+                  >
+                    Set Key in Settings
+                  </button>
+                </div>
+              );
+            }
+            return (
+              <div className="mb-4 p-2.5 px-3.5 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between gap-2 text-xs shadow-xs">
+                <div className="flex items-center gap-2 truncate">
+                  <Key className="w-3.5 h-3.5 text-[#0a452b] shrink-0" />
+                  <span className="font-semibold text-[#0d1f15] truncate">
+                    {activeKeyInfo.source === 'personal' && 'Using your Personal Gemini Key'}
+                    {activeKeyInfo.source === 'family' && 'Using Family Shared Gemini Key'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    setActiveTab('family');
+                  }}
+                  className="text-[11px] font-bold text-[#0a452b] hover:underline shrink-0"
+                >
+                  Configure Keys
+                </button>
+              </div>
+            );
+          })()}
+
           {errorMsg && (
             <div className="mb-4 p-3 rounded-xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />

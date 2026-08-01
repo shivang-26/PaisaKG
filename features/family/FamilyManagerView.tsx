@@ -42,6 +42,8 @@ export const FamilyManagerView: React.FC = () => {
     darkMode,
     toggleDarkMode,
     logout,
+    updateFamilyGeminiApiKey,
+    getActiveGeminiApiKeyInfo,
   } = useApp();
 
   const [copiedCode, setCopiedCode] = useState(false);
@@ -49,6 +51,18 @@ export const FamilyManagerView: React.FC = () => {
   const [showEditFamilyModal, setShowEditFamilyModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Gemini API Key State
+  const [familyKeyInput, setFamilyKeyInput] = useState(currentFamily?.geminiApiKey || '');
+  const [showFamilyKey, setShowFamilyKey] = useState(false);
+  const [familyKeySavedMsg, setFamilyKeySavedMsg] = useState(false);
+
+  // Sync initial inputs when active family shifts
+  const [prevFamilyId, setPrevFamilyId] = useState(currentFamily?.id);
+  if (currentFamily?.id !== prevFamilyId) {
+    setPrevFamilyId(currentFamily?.id);
+    setFamilyKeyInput(currentFamily?.geminiApiKey || '');
+  }
 
   // Invite Form State
   const [inviteEmail, setInviteEmail] = useState('');
@@ -338,20 +352,116 @@ export const FamilyManagerView: React.FC = () => {
         </div>
       </div>
 
-      {/* Future AI Configuration Placeholder Architecture */}
-      <div className="p-5 rounded-3xl bg-[#0a452b] text-white border border-[#07331f] space-y-3 shadow-sm">
+      {/* Gemini AI API Key Setup Section */}
+      <div className="p-6 rounded-[24px] bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm space-y-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bot className="w-5 h-5 text-emerald-300" />
-            <h3 className="text-sm font-bold">Future AI Configuration</h3>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center font-bold shadow-xs">
+              <Sparkles className="w-5 h-5 text-emerald-300" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[#0d1f15] flex items-center gap-2">
+                Family Gemini AI Key Setup
+              </h2>
+              <p className="text-xs text-slate-600">
+                Configure a shared family key for receipt scanning & AI features
+              </p>
+            </div>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#07331f] text-emerald-300 border border-emerald-700">
-            Architecture Ready
+          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-100 text-[#0a452b] border border-emerald-300">
+            OCR & AI Ready
           </span>
         </div>
-        <p className="text-xs text-emerald-100 opacity-90">
-          Future expansion module for custom AI providers (Google Gemini, OpenAI, Anthropic, OpenRouter). API keys belong exclusively to the end user and will never be stored on application servers.
-        </p>
+
+        {/* Family Shared Gemini API Key Card (Family Admin) */}
+        <div className="p-4 rounded-2xl bg-[#e5e9d3]/70 border border-[#d5dbcb] space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-[#0d1f15] flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-[#0a452b]" />
+                Family Shared Gemini API Key {isAdmin ? '(Admin Controls)' : '(Family Shared)'}
+              </p>
+              <p className="text-[11px] text-slate-600">
+                Shared key used by all family members who haven&apos;t set a personal key.
+              </p>
+            </div>
+            {currentFamily?.geminiApiKey ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-[#0a452b] border border-emerald-300 shrink-0">
+                Shared Key Active
+              </span>
+            ) : (
+              <span className="text-[10px] font-semibold text-slate-500 shrink-0">
+                No family key set
+              </span>
+            )}
+          </div>
+
+          {isAdmin ? (
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type={showFamilyKey ? 'text' : 'password'}
+                    value={familyKeyInput}
+                    onChange={(e) => setFamilyKeyInput(e.target.value)}
+                    placeholder="AIzaSy... (Shared for entire family)"
+                    className="w-full px-3 py-2 pr-16 text-xs font-mono bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowFamilyKey(!showFamilyKey)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 hover:text-[#0d1f15]"
+                  >
+                    {showFamilyKey ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await updateFamilyGeminiApiKey(familyKeyInput);
+                      setFamilyKeySavedMsg(true);
+                      setTimeout(() => setFamilyKeySavedMsg(false), 3000);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold transition-all shrink-0"
+                  >
+                    Save Family Key
+                  </button>
+                  {currentFamily?.geminiApiKey && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setFamilyKeyInput('');
+                        await updateFamilyGeminiApiKey('');
+                      }}
+                      className="px-3 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all shrink-0"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+              {familyKeySavedMsg && (
+                <p className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" /> Family shared Gemini API key saved!
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="text-xs text-slate-600 bg-white/80 p-3 rounded-xl border border-[#d5dbcb]">
+              {currentFamily?.geminiApiKey ? (
+                <span className="font-semibold text-[#0a452b]">
+                  ✓ Your Family Admin has configured a shared key for the family.
+                </span>
+              ) : (
+                <span className="text-slate-500">
+                  No family-wide key configured yet. Ask your Family Admin to add one or enter your personal key above.
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* INVITE MEMBER MODAL */}

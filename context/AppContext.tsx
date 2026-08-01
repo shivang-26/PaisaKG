@@ -27,8 +27,8 @@ interface AppContextType {
   isLoading: boolean;
   isOffline: boolean;
   syncQueueCount: number;
-  activeTab: 'dashboard' | 'expenses' | 'scan' | 'reports' | 'family';
-  setActiveTab: (tab: 'dashboard' | 'expenses' | 'scan' | 'reports' | 'family') => void;
+  activeTab: 'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile';
+  setActiveTab: (tab: 'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile') => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
   // Supabase Status
@@ -41,10 +41,14 @@ interface AppContextType {
   signUpWithPassword: (email: string, pass: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   switchActiveUser: (userId: string) => Promise<void>;
+  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
   createFamily: (name: string, monthlyBudget?: number) => Promise<string>;
   joinFamily: (inviteCode: string) => Promise<boolean>;
   updateFamilyBudget: (budget: number) => Promise<void>;
   updateFamilyName: (name: string) => Promise<void>;
+  updateUserGeminiApiKey: (apiKey: string) => Promise<void>;
+  updateFamilyGeminiApiKey: (apiKey: string) => Promise<void>;
+  getActiveGeminiApiKeyInfo: () => { key?: string; source: 'personal' | 'family' | 'none' };
   inviteMember: (email: string, fullName: string, role: 'Admin' | 'Member') => Promise<void>;
   removeMember: (memberId: string) => Promise<void>;
   // Expense Actions
@@ -69,7 +73,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   });
   const [syncQueueCount, setSyncQueueCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'expenses' | 'scan' | 'reports' | 'family'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile'>('dashboard');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') === 'dark';
@@ -575,6 +579,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentFamily({ ...currentFamily, name });
   };
 
+  const updateUserProfile = async (updates: Partial<UserProfile>) => {
+    if (!currentUser) return;
+    const updatedUser = { ...currentUser, ...updates };
+    await db.users.update(currentUser.id, updates);
+    setCurrentUser(updatedUser);
+
+    if (updates.fullName !== undefined || updates.avatarUrl !== undefined) {
+      const memberRecords = await db.family_members.where('userId').equals(currentUser.id).toArray();
+      for (const m of memberRecords) {
+        await db.family_members.update(m.id, {
+          fullName: updates.fullName !== undefined ? updates.fullName : m.fullName,
+          avatarUrl: updates.avatarUrl !== undefined ? updates.avatarUrl : m.avatarUrl,
+        });
+      }
+      if (currentFamily) {
+        const refreshedMembers = await db.family_members.where('familyId').equals(currentFamily.id).toArray();
+        setFamilyMembers(refreshedMembers);
+      }
+    }
+  };
+
+  const updateUserGeminiApiKey = async (apiKey: string) => {
+    if (!currentUser) return;
+    const key = apiKey.trim();
+    await db.users.update(currentUser.id, { geminiApiKey: key });
+    setCurrentUser({ ...currentUser, geminiApiKey: key });
+  };
+
+  const updateFamilyGeminiApiKey = async (apiKey: string) => {
+    if (!currentFamily) return;
+    const key = apiKey.trim();
+    await db.families.update(currentFamily.id, { geminiApiKey: key });
+    const updated = { ...currentFamily, geminiApiKey: key };
+    setCurrentFamily(updated);
+    await syncFamiliesBackup();
+  };
+
+  const getActiveGeminiApiKeyInfo = (): { key?: string; source: 'personal' | 'family' | 'none' } => {
+    if (currentUser?.geminiApiKey && currentUser.geminiApiKey.trim().length > 0) {
+      return { key: currentUser.geminiApiKey.trim(), source: 'personal' };
+    }
+    if (currentFamily?.geminiApiKey && currentFamily.geminiApiKey.trim().length > 0) {
+      return { key: currentFamily.geminiApiKey.trim(), source: 'family' };
+    }
+    return { key: undefined, source: 'none' };
+  };
+
   const inviteMember = async (email: string, fullName: string, role: 'Admin' | 'Member') => {
     if (!currentFamily) return;
     const cleanEmail = email.toLowerCase().trim();
@@ -694,10 +745,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginWithEmail,
         logout,
         switchActiveUser,
+        updateUserProfile,
         createFamily,
         joinFamily,
         updateFamilyBudget,
         updateFamilyName,
+        updateUserGeminiApiKey,
+        updateFamilyGeminiApiKey,
+        getActiveGeminiApiKeyInfo,
         inviteMember,
         removeMember,
         addExpense,

@@ -11,6 +11,7 @@ import { ScanReceiptModal } from '@/features/expenses/ScanReceiptModal';
 import { AddExpenseModal } from '@/features/expenses/AddExpenseModal';
 import { ReportsView } from '@/features/reports/ReportsView';
 import { FamilyManagerView } from '@/features/family/FamilyManagerView';
+import { ProfileView } from '@/features/profile/ProfileView';
 import { Expense } from '@/lib/types';
 import { RefreshCw } from 'lucide-react';
 
@@ -67,6 +68,8 @@ function MainApp() {
         {activeTab === 'reports' && <ReportsView />}
 
         {activeTab === 'family' && <FamilyManagerView />}
+
+        {activeTab === 'profile' && <ProfileView />}
       </main>
 
       <BottomNav onOpenScanModal={() => setIsScanModalOpen(true)} />

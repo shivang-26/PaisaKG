@@ -5,6 +5,7 @@ export interface UserProfile {
   email: string;
   fullName: string;
   avatarUrl?: string;
+  geminiApiKey?: string;
   createdAt: string;
 }
 
@@ -15,6 +16,7 @@ export interface Family {
   createdBy: string;
   monthlyBudget?: number;
   currency: string;
+  geminiApiKey?: string;
   createdAt: string;
 }
 

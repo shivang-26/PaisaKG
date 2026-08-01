@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, apiKey: customApiKey } = await req.json();
 
     if (!imageBase64) {
       return NextResponse.json(
@@ -12,11 +12,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = (customApiKey && customApiKey.trim().length > 0) ? customApiKey.trim() : null;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'Gemini API key is not configured' },
-        { status: 500 }
+        { error: 'Gemini API key is missing. Please set your Personal key or Family Shared key in Workspace Settings.' },
+        { status: 400 }
       );
     }
 
