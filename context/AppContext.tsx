@@ -100,8 +100,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(user);
     localStorage.setItem('activeUserId', user.id);
 
-    // Find family membership
-    const memberRec = await db.family_members.where('userId').equals(user.id).first();
+    // Find family membership (by userId or by email fallback if invited)
+    let memberRec = await db.family_members.where('userId').equals(user.id).first();
+    if (!memberRec && cleanEmail) {
+      memberRec = await db.family_members.where('email').equalsIgnoreCase(cleanEmail).first();
+      if (memberRec) {
+        // Link member record to this user id
+        await db.family_members.update(memberRec.id, { userId: user.id });
+      }
+    }
+
     if (memberRec) {
       const family = await db.families.get(memberRec.familyId);
       if (family) {
@@ -126,6 +134,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createdAt: new Date().toISOString(),
       };
       await db.families.add(newFam);
+
+      // Save to cross-session shared backup store
+      try {
+        const existingBackup = JSON.parse(localStorage.getItem('paisa_shared_families_backup') || '[]');
+        existingBackup.push(newFam);
+        localStorage.setItem('paisa_shared_families_backup', JSON.stringify(existingBackup));
+      } catch (e) {
+        // silent fallback
+      }
 
       const newMem: FamilyMember = {
         id: generateId('mem'),
@@ -420,6 +437,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const syncFamiliesBackup = async () => {
+    try {
+      const families = await db.families.toArray();
+      if (families.length > 0) {
+        localStorage.setItem('paisa_shared_families_backup', JSON.stringify(families));
+      }
+    } catch (e) {
+      console.error('Error syncing families backup:', e);
+    }
+  };
+
   const createFamily = async (name: string, monthlyBudget = 50000): Promise<string> => {
     if (!currentUser) throw new Error('Must be logged in to create family');
     const familyId = generateId('fam');
@@ -436,6 +464,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     await db.families.add(newFamily);
+    await syncFamiliesBackup();
 
     const adminMember: FamilyMember = {
       id: generateId('mem'),
@@ -456,9 +485,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return inviteCode;
   };
 
-  const joinFamily = async (inviteCode: string): Promise<boolean> => {
+  const joinFamily = async (rawCode: string): Promise<boolean> => {
     if (!currentUser) throw new Error('Must be logged in');
-    const targetFamily = await db.families.where('inviteCode').equalsIgnoreCase(inviteCode.trim()).first();
+
+    const cleanInput = rawCode.trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (!cleanInput) return false;
+
+    const normalize = (c: string) => c.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+
+    // 1. Fetch current DB families
+    let allFamilies = await db.families.toArray();
+
+    // 2. Load cross-session shared backup from localStorage
+    try {
+      const backupStr = localStorage.getItem('paisa_shared_families_backup');
+      if (backupStr) {
+        const backupFamilies: Family[] = JSON.parse(backupStr);
+        for (const fam of backupFamilies) {
+          if (!allFamilies.some((f) => f.id === fam.id)) {
+            await db.families.put(fam);
+            allFamilies.push(fam);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed reading family backup:', err);
+    }
+
+    // 3. Find matching family using flexible normalized rules
+    let targetFamily = allFamilies.find((fam) => {
+      const cleanFam = normalize(fam.inviteCode);
+      if (cleanFam === cleanInput) return true;
+      if (`FAM${cleanInput}` === cleanFam) return true;
+      if (`FAM${cleanFam}` === cleanInput) return true;
+      const userNoFam = cleanInput.replace(/^FAM/, '');
+      const famNoFam = cleanFam.replace(/^FAM/, '');
+      return userNoFam.length > 0 && userNoFam === famNoFam;
+    });
+
+    // 4. Fallback to Dexie equalsIgnoreCase direct query
+    if (!targetFamily) {
+      targetFamily = await db.families.where('inviteCode').equalsIgnoreCase(rawCode.trim()).first();
+    }
+
     if (!targetFamily) {
       return false;
     }
@@ -483,6 +552,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       await db.family_members.add(newMember);
     }
+
+    await syncFamiliesBackup();
 
     setCurrentFamily(targetFamily);
     const members = await db.family_members.where('familyId').equals(targetFamily.id).toArray();

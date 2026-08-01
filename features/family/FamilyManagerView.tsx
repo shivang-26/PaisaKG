@@ -359,8 +359,38 @@ export const FamilyManagerView: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#f2f5e8] rounded-3xl p-6 w-full max-w-md border border-[#d5dbcb] space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-[#0d1f15]">
-              Invite Family Member
+              Add Family Member
             </h3>
+
+            {/* Quick Share Code Banner inside Invite Modal */}
+            {currentFamily && (
+              <div className="p-3.5 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#0a452b]">
+                    Share Family Code directly
+                  </p>
+                  <p className="text-sm font-bold tracking-widest font-mono text-[#0d1f15]">
+                    {currentFamily.inviteCode}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="px-3 py-1.5 rounded-xl bg-[#0a452b] text-white text-xs font-bold hover:bg-[#07331f] transition-all flex items-center gap-1 shadow-sm"
+                >
+                  {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedCode ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+            )}
+
+            <div className="relative flex items-center justify-center my-2">
+              <div className="border-t border-[#d5dbcb] w-full"></div>
+              <span className="bg-[#f2f5e8] px-2 text-[10px] uppercase font-bold text-slate-500 shrink-0">
+                Or Add by Email
+              </span>
+            </div>
+
             <form onSubmit={handleInviteSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -484,20 +514,26 @@ export const FamilyManagerView: React.FC = () => {
             <h3 className="text-base font-bold text-[#0d1f15]">
               Join Family with Invite Code
             </h3>
+            <p className="text-xs text-slate-600">
+              Enter the invite code shared by your family admin. You can enter it with or without the &quot;FAM-&quot; prefix.
+            </p>
+
             {errorMsg && (
-              <p className="text-xs text-rose-600 font-medium">{errorMsg}</p>
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
+                {errorMsg}
+              </div>
             )}
             <form onSubmit={handleJoinFamily} className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Invite Code (e.g. FAM-SH7890)
+                  Invite Code (e.g. FAM-SH7890 or SH7890)
                 </label>
                 <input
                   type="text"
                   required
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  placeholder="FAM-XXXXXX"
+                  placeholder="e.g. FAM-SH7890"
                   className="w-full px-3 py-2 text-xs font-mono uppercase bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
