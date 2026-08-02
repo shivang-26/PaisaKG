@@ -165,9 +165,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return Boolean(url && key);
   });
 
+  // Helper to search user by email reliably (with case-insensitive index + array scan fallback)
+  const findUserByEmail = async (email: string): Promise<UserProfile | undefined> => {
+    const cleanEmail = email.toLowerCase().trim();
+    if (!cleanEmail) return undefined;
+
+    try {
+      const user = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+      if (user) return user;
+    } catch (e) {
+      console.warn('[DB User Lookup Index Error]:', e);
+    }
+
+    try {
+      const allUsers = await db.users.toArray();
+      return allUsers.find((u) => u.email?.toLowerCase().trim() === cleanEmail);
+    } catch (e) {
+      console.warn('[DB User Lookup Scan Error]:', e);
+    }
+
+    return undefined;
+  };
+
+  // Helper to fetch family, members, and expenses for a user
+  const findFamilyDataForUser = async (userId: string, userEmail: string) => {
+    const cleanEmail = userEmail.toLowerCase().trim();
+
+    // 1. Look up member record by userId
+    let memberRec = await db.family_members.where('userId').equals(userId).first();
+
+    // 2. Look up member record by email if not found by userId
+    if (!memberRec && cleanEmail) {
+      try {
+        memberRec = await db.family_members.where('email').equalsIgnoreCase(cleanEmail).first();
+      } catch (e) {
+        // ignore
+      }
+      if (!memberRec) {
+        const allMembers = await db.family_members.toArray();
+        memberRec = allMembers.find((m) => m.email?.toLowerCase().trim() === cleanEmail);
+      }
+      if (memberRec) {
+        // Re-link member record to user id
+        await db.family_members.update(memberRec.id, { userId });
+      }
+    }
+
+    if (memberRec) {
+      const family = await db.families.get(memberRec.familyId);
+      if (family) {
+        const members = await db.family_members.where('familyId').equals(family.id).toArray();
+        const expenses = await db.expenses.where('familyId').equals(family.id).reverse().toArray();
+        return { family, members, expenses };
+      }
+    }
+
+    return null;
+  };
+
   const loginWithEmail = async (email: string, otpCode: string, fullName?: string): Promise<boolean> => {
     const cleanEmail = email.toLowerCase().trim();
-    let user = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+    let user = await findUserByEmail(cleanEmail);
+
     if (!user) {
       const newUserId = generateId('usr');
       user = {
@@ -178,30 +237,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createdAt: new Date().toISOString(),
       };
       await db.users.add(user);
+    } else if (fullName?.trim() && user.fullName !== fullName.trim()) {
+      const updatedName = fullName.trim();
+      await db.users.update(user.id, { fullName: updatedName });
+      user = { ...user, fullName: updatedName };
     }
 
     setCurrentUser(user);
     localStorage.setItem('activeUserId', user.id);
 
-    // Find family membership (by userId or by email fallback if invited)
-    let memberRec = await db.family_members.where('userId').equals(user.id).first();
-    if (!memberRec && cleanEmail) {
-      memberRec = await db.family_members.where('email').equalsIgnoreCase(cleanEmail).first();
-      if (memberRec) {
-        // Link member record to this user id
-        await db.family_members.update(memberRec.id, { userId: user.id });
-      }
-    }
+    // Find existing family workspace for this user
+    const familyData = await findFamilyDataForUser(user.id, user.email);
 
-    if (memberRec) {
-      const family = await db.families.get(memberRec.familyId);
-      if (family) {
-        setCurrentFamily(family);
-        const members = await db.family_members.where('familyId').equals(family.id).toArray();
-        setFamilyMembers(members);
-        const familyExpenses = await db.expenses.where('familyId').equals(family.id).reverse().toArray();
-        setExpenses(familyExpenses);
-      }
+    if (familyData) {
+      setCurrentFamily(familyData.family);
+      setFamilyMembers(familyData.members);
+      setExpenses(familyData.expenses);
     } else {
       // New account onboarding: Create their dedicated new family workspace
       const newFamId = generateId('fam');
@@ -254,23 +305,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isSignUp?: boolean
   ): Promise<{ success: boolean; error?: string }> => {
     const cleanEmail = email.toLowerCase().trim();
+    const existingUser = await findUserByEmail(cleanEmail);
 
-    if (isSignUp) {
-      const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
-      if (existingUser) {
-        return {
-          success: false,
-          error: 'An account with this email address already exists. Please sign in instead.',
-        };
-      }
-    } else {
-      const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
-      if (!existingUser) {
-        return {
-          success: false,
-          error: 'No account found with this email. Please sign up to register a new account.',
-        };
-      }
+    if (isSignUp === true && existingUser) {
+      return {
+        success: false,
+        error: 'An account with this email address already exists. Please sign in instead.',
+      };
+    }
+
+    if (isSignUp === false && !existingUser) {
+      return {
+        success: false,
+        error: 'No account found with this email. Please sign up to register a new account.',
+      };
     }
 
     const res = await verifyCustomOtp(cleanEmail, code);
@@ -342,6 +390,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await seedInitialData();
 
+      // Automatic deduplication of legacy duplicate users by email
+      try {
+        const allUsers = await db.users.toArray();
+        const emailToFirstUser = new Map<string, UserProfile>();
+        for (const u of allUsers) {
+          const lowerEmail = u.email.toLowerCase().trim();
+          if (!emailToFirstUser.has(lowerEmail)) {
+            emailToFirstUser.set(lowerEmail, u);
+          } else {
+            const originalUser = emailToFirstUser.get(lowerEmail)!;
+            const duplicateMembers = await db.family_members.where('userId').equals(u.id).toArray();
+            for (const m of duplicateMembers) {
+              await db.family_members.update(m.id, { userId: originalUser.id });
+            }
+            await db.users.delete(u.id);
+          }
+        }
+      } catch (e) {
+        console.warn('Deduplication cleanup error:', e);
+      }
+
       // Get saved active user from local storage
       const savedUserId = localStorage.getItem('activeUserId');
       let activeUser: UserProfile | null = null;
@@ -354,21 +423,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentUser(activeUser);
 
       if (activeUser) {
-        // Find family membership
-        const memberRec = await db.family_members.where('userId').equals(activeUser.id).first();
-        if (memberRec) {
-          const family = await db.families.get(memberRec.familyId);
-          if (family) {
-            setCurrentFamily(family);
-
-            // Fetch all members for this family
-            const members = await db.family_members.where('familyId').equals(family.id).toArray();
-            setFamilyMembers(members);
-
-            // Fetch expenses for this family
-            const familyExpenses = await db.expenses.where('familyId').equals(family.id).reverse().toArray();
-            setExpenses(familyExpenses);
-          }
+        const familyData = await findFamilyDataForUser(activeUser.id, activeUser.email);
+        if (familyData) {
+          setCurrentFamily(familyData.family);
+          setFamilyMembers(familyData.members);
+          setExpenses(familyData.expenses);
         }
       }
 
@@ -409,7 +468,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isSignUp?: boolean
   ): Promise<{ success: boolean; error?: string }> => {
     const cleanEmail = email.toLowerCase().trim();
-    const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+    const existingUser = await findUserByEmail(cleanEmail);
 
     if (isSignUp && existingUser) {
       return {
@@ -437,12 +496,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     pass: string
   ): Promise<{ success: boolean; error?: string }> => {
     const cleanEmail = email.toLowerCase().trim();
+    const existingUser = await findUserByEmail(cleanEmail);
 
     if (hasSupabase) {
       const res = await signInWithSupabasePassword(cleanEmail, pass);
       if (!res.success) {
-        // If Supabase hits rate limits or error, fallback to local database authentication
-        const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
         if (existingUser) {
           await loginWithEmail(cleanEmail, '123456');
           return { success: true };
@@ -454,7 +512,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { success: false, error: res.error || 'Invalid email or password' };
       }
     } else {
-      const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
       if (!existingUser) {
         return {
           success: false,
@@ -475,7 +532,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cleanEmail = email.toLowerCase().trim();
 
     // Check if user already exists
-    const existingUser = await db.users.where('email').equalsIgnoreCase(cleanEmail).first();
+    const existingUser = await findUserByEmail(cleanEmail);
     if (existingUser) {
       return {
         success: false,
@@ -487,13 +544,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const res = await signUpWithSupabasePassword(cleanEmail, pass, fullName);
       if (!res.success) {
         console.warn('[Supabase SignUp Notice]:', res.error);
-        // If Supabase returns rate limit error or email rate limit issue, fall back to local onboarding
         if (
-          res.error?.toLowerCase().includes('rate limit') ||
-          res.error?.toLowerCase().includes('email')
+          !res.error?.toLowerCase().includes('rate limit') &&
+          !res.error?.toLowerCase().includes('email')
         ) {
-          // Proceed with local account creation smoothly
-        } else {
           return { success: false, error: res.error || 'Sign up failed' };
         }
       }
@@ -516,7 +570,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (targetUser) {
       setCurrentUser(targetUser);
       localStorage.setItem('activeUserId', targetUser.id);
-      await refreshData();
+      const familyData = await findFamilyDataForUser(targetUser.id, targetUser.email);
+      if (familyData) {
+        setCurrentFamily(familyData.family);
+        setFamilyMembers(familyData.members);
+        setExpenses(familyData.expenses);
+      }
     }
   };
 

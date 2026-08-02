@@ -29,6 +29,7 @@ import {
   MoreHorizontal,
   ChevronDown,
   Sparkles,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface ExpenseListProps {
@@ -337,243 +338,261 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
         </div>
       )}
 
-      {/* EXPENSE DETAIL & EDIT LIGHTBOX MODAL */}
+      {/* EXPENSE DETAIL & EDIT FULL PAGE VIEW (PAYTM STYLE) */}
       {selectedExpense && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="bg-white rounded-[28px] shadow-2xl border border-slate-100 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-[#e5e9d3]/40 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
-                  <Receipt className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-extrabold text-[#0d1f15]">
-                    {isEditing ? 'Edit Expense' : 'Expense Details'}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    ID: {selectedExpense.id}
-                  </p>
-                </div>
-              </div>
+        <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          {/* Header Bar with Back Button */}
+          <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => {
                   onSelectExpense(null);
                   setIsEditing(false);
                 }}
-                className="w-8 h-8 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-all"
+                className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+                title="Go Back"
               >
-                <X className="w-4 h-4" />
+                <ArrowLeft className="w-5 h-5" />
               </button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+                  <Receipt className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                    {isEditing ? 'Edit Expense' : 'Expense Details'}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    ID: {selectedExpense.id}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-5 overflow-y-auto flex-1 space-y-4">
-              {isEditing ? (
-                /* EDIT FORM */
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Merchant
-                    </label>
-                    <input
-                      type="text"
-                      value={editMerchant}
-                      onChange={(e) => setEditMerchant(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
-                    />
+            <button
+              type="button"
+              onClick={() => {
+                onSelectExpense(null);
+                setIsEditing(false);
+              }}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Full Page Body */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-2xl mx-auto w-full space-y-4">
+            {isEditing ? (
+              /* EDIT FORM */
+              <div className="space-y-4 bg-white p-5 rounded-2xl border border-[#d5dbcb] shadow-xs">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Merchant
+                  </label>
+                  <input
+                    type="text"
+                    value={editMerchant}
+                    onChange={(e) => setEditMerchant(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={editAmount}
+                    onChange={(e) => setEditAmount(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value as ExpenseCategoryKey)}
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  >
+                    {Object.values(CATEGORIES).map((cat) => (
+                      <option key={cat.key} value={cat.key}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Notes
+                  </label>
+                  <input
+                    type="text"
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  />
+                </div>
+              </div>
+            ) : (
+              /* VIEW DISPLAY */
+              <div className="space-y-4">
+                <div className="text-center p-6 rounded-2xl bg-gradient-to-b from-[#f2f5e8] to-[#e5e9d3] border border-[#d5dbcb] shadow-xs">
+                  <p className="text-xs uppercase font-bold text-[#0a452b] tracking-wider">
+                    Amount Paid
+                  </p>
+                  <p className="text-4xl font-black text-[#0d1f15] mt-1.5">
+                    {formatAmount(selectedExpense.amount, selectedExpense.currency)}
+                  </p>
+                  <span className="inline-block px-4 py-1 rounded-full bg-[#0a452b] text-white text-xs font-bold mt-3 shadow-xs">
+                    {selectedExpense.category}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                    <p className="text-slate-500 font-medium">Merchant</p>
+                    <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
+                      {selectedExpense.merchant}
+                    </p>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Amount (₹)
-                    </label>
-                    <input
-                      type="number"
-                      value={editAmount}
-                      onChange={(e) => setEditAmount(Number(e.target.value))}
-                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
-                    />
+                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                    <p className="text-slate-500 font-medium">Date</p>
+                    <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
+                      {formatDate(selectedExpense.expenseDate)}
+                    </p>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Category
-                    </label>
-                    <select
-                      value={editCategory}
-                      onChange={(e) => setEditCategory(e.target.value as ExpenseCategoryKey)}
-                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
-                    >
-                      {Object.values(CATEGORIES).map((cat) => (
-                        <option key={cat.key} value={cat.key}>
-                          {cat.name}
-                        </option>
+                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                    <p className="text-slate-500 font-medium">Paid By</p>
+                    <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
+                      {selectedExpense.createdByName}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                    <p className="text-slate-500 font-medium">Sync Status</p>
+                    <p className="font-bold text-[#0a452b] mt-0.5 text-sm">
+                      {selectedExpense.synced ? 'Synced to Cloud' : 'Saved Offline'}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedExpense.notes && (
+                  <div className="p-4 bg-white border border-[#d5dbcb] rounded-xl text-xs shadow-2xs">
+                    <p className="text-slate-500 font-medium">Notes</p>
+                    <p className="font-semibold text-[#0d1f15] mt-0.5 text-sm">
+                      {selectedExpense.notes}
+                    </p>
+                  </div>
+                )}
+
+                {/* Line Items if available */}
+                {selectedExpense.items && selectedExpense.items.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-bold text-[#0d1f15]">
+                      Line Items Breakdown ({selectedExpense.items.length})
+                    </p>
+                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl divide-y divide-[#d5dbcb] text-xs shadow-2xs">
+                      {selectedExpense.items.map((item, idx) => (
+                        <div key={idx} className="py-2 flex items-center justify-between">
+                          <span className="font-medium text-[#0d1f15]">
+                            {item.name} {item.qty ? `x${item.qty}` : ''}
+                          </span>
+                          <span className="font-bold text-[#0d1f15]">
+                            ₹{item.price}
+                          </span>
+                        </div>
                       ))}
-                    </select>
+                    </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Date
-                    </label>
-                    <input
-                      type="date"
-                      value={editDate}
-                      onChange={(e) => setEditDate(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Notes
-                    </label>
-                    <input
-                      type="text"
-                      value={editNotes}
-                      onChange={(e) => setEditNotes(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
-                    />
-                  </div>
-                </div>
-              ) : (
-                /* VIEW DISPLAY */
-                <div className="space-y-4">
-                  <div className="text-center p-4 rounded-2xl bg-[#e5e9d3] border border-[#d5dbcb]">
-                    <p className="text-xs uppercase font-bold text-[#0a452b]">
-                      Amount Paid
+                {/* Receipt Image Preview */}
+                {selectedExpense.receiptImage && (
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-bold text-[#0d1f15]">
+                      Attached Receipt Image
                     </p>
-                    <p className="text-3xl font-black text-[#0d1f15] mt-1">
-                      {formatAmount(selectedExpense.amount, selectedExpense.currency)}
-                    </p>
-                    <span className="inline-block px-3 py-0.5 rounded-full bg-[#0a452b] text-white text-[11px] font-bold mt-2">
-                      {selectedExpense.category}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
-                      <p className="text-slate-500 font-medium">Merchant</p>
-                      <p className="font-bold text-[#0d1f15] mt-0.5">
-                        {selectedExpense.merchant}
-                      </p>
-                    </div>
-
-                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
-                      <p className="text-slate-500 font-medium">Date</p>
-                      <p className="font-bold text-[#0d1f15] mt-0.5">
-                        {formatDate(selectedExpense.expenseDate)}
-                      </p>
-                    </div>
-
-                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
-                      <p className="text-slate-500 font-medium">Paid By</p>
-                      <p className="font-bold text-[#0d1f15] mt-0.5">
-                        {selectedExpense.createdByName}
-                      </p>
-                    </div>
-
-                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl">
-                      <p className="text-slate-500 font-medium">Sync Status</p>
-                      <p className="font-bold text-[#0a452b] mt-0.5">
-                        {selectedExpense.synced ? 'Synced to Cloud' : 'Saved Offline'}
-                      </p>
+                    <div className="rounded-2xl overflow-hidden border border-[#d5dbcb] max-h-72 shadow-xs bg-black">
+                      <img
+                        src={selectedExpense.receiptImage}
+                        alt="Receipt"
+                        className="w-full h-full object-contain max-h-72 mx-auto"
+                      />
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+          </div>
 
-                  {selectedExpense.notes && (
-                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl text-xs">
-                      <p className="text-slate-500 font-medium">Notes</p>
-                      <p className="font-semibold text-[#0d1f15] mt-0.5">
-                        {selectedExpense.notes}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Line Items if available */}
-                  {selectedExpense.items && selectedExpense.items.length > 0 && (
-                    <div className="space-y-1.5">
-                      <p className="text-xs font-bold text-[#0d1f15]">
-                        Line Items Breakdown ({selectedExpense.items.length})
-                      </p>
-                      <div className="p-2 bg-white border border-[#d5dbcb] rounded-xl divide-y divide-[#d5dbcb] text-xs">
-                        {selectedExpense.items.map((item, idx) => (
-                          <div key={idx} className="py-1.5 flex items-center justify-between">
-                            <span className="font-medium text-[#0d1f15]">
-                              {item.name} {item.qty ? `x${item.qty}` : ''}
-                            </span>
-                            <span className="font-bold text-[#0d1f15]">
-                              ₹{item.price}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Receipt Image Preview */}
-                  {selectedExpense.receiptImage && (
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-[#0d1f15]">
-                        Attached Receipt Image
-                      </p>
-                      <div className="rounded-2xl overflow-hidden border border-[#d5dbcb] max-h-48">
-                        <img
-                          src={selectedExpense.receiptImage}
-                          alt="Receipt"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                  )}
+          {/* Sticky Bottom Bar */}
+          <div className="p-4 border-t border-[#d5dbcb] bg-[#f2f5e8] flex items-center justify-between gap-3 sticky bottom-0 z-20">
+            {isEditing ? (
+              <div className="max-w-2xl mx-auto w-full flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="flex-1 py-3 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 bg-white hover:bg-[#e5e9d3] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveEdit}
+                  className="flex-1 py-3 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-xs transition-all"
+                >
+                  Save Changes
+                </button>
+              </div>
+            ) : (
+              <div className="max-w-2xl mx-auto w-full flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => handleStartEdit(selectedExpense)}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-white border border-[#d5dbcb] hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+                  >
+                    <Edit className="w-3.5 h-3.5 text-[#0a452b]" /> Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleShare(selectedExpense)}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-white border border-[#d5dbcb] hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-[#0a452b]" /> Share
+                  </button>
                 </div>
-              )}
-            </div>
 
-            {/* Footer Buttons */}
-            <div className="p-4 border-t border-[#d5dbcb] bg-[#e5e9d3] flex items-center justify-between gap-2">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 bg-white hover:bg-[#e5e9d3]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveEdit}
-                    className="px-5 py-2 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold"
-                  >
-                    Save Changes
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleStartEdit(selectedExpense)}
-                      className="p-2 rounded-xl bg-white border border-[#d5dbcb] hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center gap-1"
-                    >
-                      <Edit className="w-3.5 h-3.5 text-[#0a452b]" /> Edit
-                    </button>
-                    <button
-                      onClick={() => handleShare(selectedExpense)}
-                      className="p-2 rounded-xl bg-white border border-[#d5dbcb] hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center gap-1"
-                    >
-                      <Share2 className="w-3.5 h-3.5 text-[#0a452b]" /> Share
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => handleDelete(selectedExpense.id)}
-                    className="p-2 rounded-xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-bold flex items-center gap-1"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" /> Delete
-                  </button>
-                </>
-              )}
-            </div>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(selectedExpense.id)}
+                  className="py-2.5 px-4 rounded-xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
