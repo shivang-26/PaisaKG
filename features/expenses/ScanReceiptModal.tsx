@@ -492,45 +492,6 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                   className="hidden"
                 />
               </div>
-
-              {/* Sample test receipts for instant testing */}
-              <div className="pt-2">
-                <p className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Or try sample receipts for instant testing:
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const sample1 = 'https://picsum.photos/seed/sample_receipt_groceries/600/900';
-                      setSelectedImage(sample1);
-                      processOCR(sample1);
-                    }}
-                    className="p-3 rounded-2xl border border-[#d5dbcb] bg-white hover:border-[#0a452b] text-left transition-all flex items-center gap-2"
-                  >
-                    <Receipt className="w-4 h-4 text-[#0a452b]" />
-                    <div>
-                      <p className="text-xs font-bold text-[#0d1f15]">Supermarket Bill</p>
-                      <p className="text-[10px] text-slate-500">Grocery items sample</p>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const sample2 = 'https://picsum.photos/seed/sample_receipt_restaurant/600/900';
-                      setSelectedImage(sample2);
-                      processOCR(sample2);
-                    }}
-                    className="p-3 rounded-2xl border border-[#d5dbcb] bg-white hover:border-[#0a452b] text-left transition-all flex items-center gap-2"
-                  >
-                    <Receipt className="w-4 h-4 text-blue-700" />
-                    <div>
-                      <p className="text-xs font-bold text-[#0d1f15]">Diner Bill</p>
-                      <p className="text-[10px] text-slate-500">Food & Dining sample</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
             </div>
           )}
 

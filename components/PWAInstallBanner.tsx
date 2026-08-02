@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Download, Smartphone, X, Share2, Sparkles, ExternalLink, CheckCircle } from 'lucide-react';
+import { Download, Smartphone, X, Share2, Sparkles, ExternalLink, CheckCircle, ArrowLeft } from 'lucide-react';
 
 export const PWAInstallBanner: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -128,36 +128,60 @@ export const PWAInstallBanner: React.FC = () => {
         </div>
       </div>
 
-      {/* iOS Install Instructions Modal */}
+      {/* iOS Install Instructions FULL PAGE */}
       {showIOSInstructions && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#f2f5e8] text-[#0d1f15] p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl border border-[#d5dbcb]">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-base flex items-center gap-2 text-[#0a452b]">
-                <Smartphone className="w-5 h-5" /> Install on iOS / Safari
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => setShowIOSInstructions(false)}
-                className="p-1 rounded-full text-slate-500 hover:text-[#0d1f15]"
+                className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+                title="Go Back"
               >
-                <X className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5" />
               </button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+                  <Smartphone className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                    Install on iOS / Safari
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Step-by-step home screen shortcut
+                  </p>
+                </div>
+              </div>
             </div>
-            <ol className="text-xs space-y-2.5 list-decimal list-inside text-slate-700 bg-white p-4 rounded-2xl border border-[#d5dbcb]">
-              <li>
+            <button
+              type="button"
+              onClick={() => setShowIOSInstructions(false)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full space-y-4">
+            <ol className="text-xs space-y-3 list-decimal list-inside text-slate-700 bg-white p-5 rounded-2xl border border-[#d5dbcb] shadow-2xs">
+              <li className="leading-relaxed">
                 Tap the <Share2 className="w-4 h-4 inline text-[#0a452b] mx-1" />{' '}
                 <strong>Share</strong> button in Safari toolbar
               </li>
-              <li>
+              <li className="leading-relaxed">
                 Scroll down and select <strong>&quot;Add to Home Screen&quot;</strong>
               </li>
-              <li>
+              <li className="leading-relaxed">
                 Tap <strong>Add</strong> in top right corner
               </li>
             </ol>
+
             <button
+              type="button"
               onClick={() => setShowIOSInstructions(false)}
-              className="w-full py-2.5 rounded-xl bg-[#0a452b] text-white text-xs font-bold shadow-md hover:bg-[#07331f]"
+              className="w-full py-3 rounded-xl bg-[#0a452b] text-white text-xs font-bold shadow-xs hover:bg-[#07331f] transition-all"
             >
               Done
             </button>
@@ -165,54 +189,77 @@ export const PWAInstallBanner: React.FC = () => {
         </div>
       )}
 
-      {/* Direct Installation / Standalone Modal Fallback */}
+      {/* Direct Installation / Standalone FULL PAGE */}
       {showFallbackModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#f2f5e8] text-[#0d1f15] p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl border border-[#d5dbcb]">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-base flex items-center gap-2 text-[#0a452b]">
-                <Download className="w-5 h-5" /> Install PaisaKG App
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={() => setShowFallbackModal(false)}
-                className="p-1 rounded-full text-slate-500 hover:text-[#0d1f15]"
+                className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+                title="Go Back"
               >
-                <X className="w-5 h-5" />
+                <ArrowLeft className="w-5 h-5" />
               </button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+                  <Download className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                    Install PaisaKG App
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Standalone App Installation
+                  </p>
+                </div>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowFallbackModal(false)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-            <p className="text-xs text-slate-700 leading-relaxed">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full space-y-4">
+            <p className="text-xs text-slate-700 leading-relaxed bg-white p-4 rounded-xl border border-[#d5dbcb]">
               To install PaisaKG directly onto your desktop or home screen:
             </p>
 
-            <div className="space-y-2 bg-white p-4 rounded-2xl border border-[#d5dbcb] text-xs">
-              <div className="flex items-start gap-2">
+            <div className="space-y-3 bg-white p-5 rounded-2xl border border-[#d5dbcb] text-xs shadow-2xs">
+              <div className="flex items-start gap-2.5">
                 <CheckCircle className="w-4 h-4 text-[#0a452b] shrink-0 mt-0.5" />
-                <span>
+                <span className="leading-relaxed">
                   <strong>Chrome / Edge / Brave:</strong> Click the <strong>Install</strong> icon in the address bar (top right).
                 </span>
               </div>
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2.5">
                 <CheckCircle className="w-4 h-4 text-[#0a452b] shrink-0 mt-0.5" />
-                <span>
+                <span className="leading-relaxed">
                   <strong>Mobile Web:</strong> Tap your browser menu (⋮) and choose <strong>Add to Home Screen</strong>.
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-3 pt-2">
               <button
+                type="button"
                 onClick={() => {
                   window.open(window.location.href, '_blank');
                   setShowFallbackModal(false);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
+                className="flex-1 py-3 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all"
               >
                 <ExternalLink className="w-4 h-4" /> Open Direct App Tab
               </button>
               <button
+                type="button"
                 onClick={() => setShowFallbackModal(false)}
-                className="px-4 py-2.5 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 bg-white hover:bg-[#e5e9d3]"
+                className="px-5 py-3 rounded-xl border border-[#d5dbcb] text-xs font-bold text-slate-700 bg-white hover:bg-[#e5e9d3] transition-all"
               >
                 Close
               </button>

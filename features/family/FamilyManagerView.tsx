@@ -23,6 +23,8 @@ import {
   Plus,
   LogOut,
   ArrowRight,
+  ArrowLeft,
+  X,
 } from 'lucide-react';
 
 export const FamilyManagerView: React.FC = () => {
@@ -464,44 +466,73 @@ export const FamilyManagerView: React.FC = () => {
         </div>
       </div>
 
-      {/* INVITE MEMBER MODAL */}
+      {/* INVITE MEMBER FULL PAGE */}
       {showInviteModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#f2f5e8] rounded-3xl p-6 w-full max-w-md border border-[#d5dbcb] space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-[#0d1f15]">
-              Add Family Member
-            </h3>
+        <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowInviteModal(false)}
+                className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+                  <UserPlus className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                    Add Family Member
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Invite to shared budget workspace
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowInviteModal(false)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full space-y-4">
             {/* Quick Share Code Banner inside Invite Modal */}
             {currentFamily && (
-              <div className="p-3.5 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between gap-2">
+              <div className="p-4 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between gap-3 shadow-2xs">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-[#0a452b]">
                     Share Family Code directly
                   </p>
-                  <p className="text-sm font-bold tracking-widest font-mono text-[#0d1f15]">
+                  <p className="text-base font-bold tracking-widest font-mono text-[#0d1f15] mt-0.5">
                     {currentFamily.inviteCode}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="px-3 py-1.5 rounded-xl bg-[#0a452b] text-white text-xs font-bold hover:bg-[#07331f] transition-all flex items-center gap-1 shadow-sm"
+                  className="px-4 py-2 rounded-xl bg-[#0a452b] text-white text-xs font-bold hover:bg-[#07331f] transition-all flex items-center gap-1.5 shadow-xs"
                 >
-                  {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedCode ? 'Copied!' : 'Copy'}
+                  {copiedCode ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                  {copiedCode ? 'Copied!' : 'Copy Code'}
                 </button>
               </div>
             )}
 
-            <div className="relative flex items-center justify-center my-2">
+            <div className="relative flex items-center justify-center my-4">
               <div className="border-t border-[#d5dbcb] w-full"></div>
-              <span className="bg-[#f2f5e8] px-2 text-[10px] uppercase font-bold text-slate-500 shrink-0">
+              <span className="bg-[#e5e9d3] px-3 text-[10px] uppercase font-bold text-slate-500 shrink-0">
                 Or Add by Email
               </span>
             </div>
 
-            <form onSubmit={handleInviteSubmit} className="space-y-3">
+            <form onSubmit={handleInviteSubmit} className="space-y-4 bg-white p-5 rounded-2xl border border-[#d5dbcb] shadow-2xs">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   Email Address *
@@ -512,7 +543,7 @@ export const FamilyManagerView: React.FC = () => {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="family.member@example.com"
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
 
@@ -525,7 +556,7 @@ export const FamilyManagerView: React.FC = () => {
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
                   placeholder="e.g. Siya Sharma"
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
 
@@ -536,24 +567,24 @@ export const FamilyManagerView: React.FC = () => {
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as 'Admin' | 'Member')}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 >
                   <option value="Member">Member (Can log & view expenses)</option>
                   <option value="Admin">Admin (Can edit family & invite)</option>
                 </select>
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowInviteModal(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3]"
+                  className="flex-1 py-3 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-md"
+                  className="flex-1 py-3 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-xs transition-all"
                 >
                   Add Member
                 </button>
@@ -563,14 +594,44 @@ export const FamilyManagerView: React.FC = () => {
         </div>
       )}
 
-      {/* EDIT FAMILY MODAL */}
+      {/* EDIT FAMILY FULL PAGE */}
       {showEditFamilyModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#f2f5e8] rounded-3xl p-6 w-full max-w-md border border-[#d5dbcb] space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-[#0d1f15]">
-              Edit Family Workspace
-            </h3>
-            <form onSubmit={handleEditFamilySubmit} className="space-y-3">
+        <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowEditFamilyModal(false)}
+                className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+                  <Edit2 className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                    Edit Family Workspace
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Update family name and budget limit
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowEditFamilyModal(false)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full">
+            <form onSubmit={handleEditFamilySubmit} className="space-y-4 bg-white p-5 rounded-2xl border border-[#d5dbcb] shadow-2xs">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   Family Name
@@ -580,7 +641,7 @@ export const FamilyManagerView: React.FC = () => {
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
 
@@ -593,21 +654,21 @@ export const FamilyManagerView: React.FC = () => {
                   required
                   value={editBudget}
                   onChange={(e) => setEditBudget(Number(e.target.value))}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowEditFamilyModal(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3]"
+                  className="flex-1 py-3 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-md"
+                  className="flex-1 py-3 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-xs transition-all"
                 >
                   Save Changes
                 </button>
@@ -617,23 +678,53 @@ export const FamilyManagerView: React.FC = () => {
         </div>
       )}
 
-      {/* JOIN FAMILY MODAL */}
+      {/* JOIN FAMILY FULL PAGE */}
       {showJoinModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#f2f5e8] rounded-3xl p-6 w-full max-w-md border border-[#d5dbcb] space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-[#0d1f15]">
-              Join Family with Invite Code
-            </h3>
-            <p className="text-xs text-slate-600">
+        <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowJoinModal(false)}
+                className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+                  <Building2 className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                    Join Family Workspace
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Connect with family invite code
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowJoinModal(false)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full space-y-4">
+            <p className="text-xs text-slate-600 bg-white p-3.5 rounded-xl border border-[#d5dbcb]">
               Enter the invite code shared by your family admin. You can enter it with or without the &quot;FAM-&quot; prefix.
             </p>
 
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
                 {errorMsg}
               </div>
             )}
-            <form onSubmit={handleJoinFamily} className="space-y-3">
+            <form onSubmit={handleJoinFamily} className="space-y-4 bg-white p-5 rounded-2xl border border-[#d5dbcb] shadow-2xs">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   Invite Code (e.g. FAM-SH7890 or SH7890)
@@ -644,21 +735,21 @@ export const FamilyManagerView: React.FC = () => {
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   placeholder="e.g. FAM-SH7890"
-                  className="w-full px-3 py-2 text-xs font-mono uppercase bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs font-mono uppercase bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowJoinModal(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3]"
+                  className="flex-1 py-3 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-md"
+                  className="flex-1 py-3 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-xs transition-all"
                 >
                   Join Workspace
                 </button>
@@ -668,14 +759,44 @@ export const FamilyManagerView: React.FC = () => {
         </div>
       )}
 
-      {/* CREATE FAMILY MODAL */}
+      {/* CREATE FAMILY FULL PAGE */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#f2f5e8] rounded-3xl p-6 w-full max-w-md border border-[#d5dbcb] space-y-4 shadow-2xl">
-            <h3 className="text-base font-bold text-[#0d1f15]">
-              Create New Family Workspace
-            </h3>
-            <form onSubmit={handleCreateFamily} className="space-y-3">
+        <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <div className="px-4 py-3 bg-[#f2f5e8] border-b border-[#d5dbcb] flex items-center justify-between shadow-xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="p-2 rounded-xl text-slate-700 hover:text-[#0d1f15] hover:bg-[#d5dbcb]/40 transition-all flex items-center justify-center"
+                title="Go Back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0a452b] text-white flex items-center justify-center shadow-xs">
+                  <Plus className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0d1f15] leading-tight">
+                    Create New Family Workspace
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Start a dedicated budget group
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(false)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-[#d5dbcb]/40 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full">
+            <form onSubmit={handleCreateFamily} className="space-y-4 bg-white p-5 rounded-2xl border border-[#d5dbcb] shadow-2xs">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   Family Name
@@ -686,7 +807,7 @@ export const FamilyManagerView: React.FC = () => {
                   value={newFamName}
                   onChange={(e) => setNewFamName(e.target.value)}
                   placeholder="e.g. Kapoor Family"
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
 
@@ -698,21 +819,21 @@ export const FamilyManagerView: React.FC = () => {
                   type="number"
                   value={newFamBudget}
                   onChange={(e) => setNewFamBudget(Number(e.target.value))}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3]"
+                  className="flex-1 py-3 text-xs font-bold text-slate-700 border border-[#d5dbcb] rounded-xl hover:bg-[#e5e9d3] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-md"
+                  className="flex-1 py-3 text-xs font-bold bg-[#0a452b] hover:bg-[#07331f] text-white rounded-xl shadow-xs transition-all"
                 >
                   Create Workspace
                 </button>
