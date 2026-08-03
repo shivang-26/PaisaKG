@@ -78,7 +78,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   });
   const [syncQueueCount, setSyncQueueCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile'>('dashboard');
+  const [activeTab, setActiveTabState] = useState<'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile'>('dashboard');
+
+  const setActiveTab = (tab: 'dashboard' | 'expenses' | 'scan' | 'reports' | 'family' | 'profile') => {
+    setActiveTabState(tab);
+    if (typeof window !== 'undefined') {
+      const curState = window.history.state;
+      if (!curState || curState.tab !== tab || (curState.modal && curState.modal !== null)) {
+        window.history.pushState(
+          { paisaApp: true, tab, modal: null },
+          '',
+          `#${tab}`
+        );
+      }
+    }
+  };
 
   const getCurrentMonthStr = () => {
     const d = new Date();
