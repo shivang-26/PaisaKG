@@ -74,6 +74,16 @@ export async function compressImage(file: File, maxWidth = 1000): Promise<string
   });
 }
 
+export function triggerHaptic(pattern: number | number[] = 15) {
+  if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      // Ignore if vibration is restricted or unsupported
+    }
+  }
+}
+
 export function exportExpensesCSV(expenses: Expense[], familyName: string) {
   const data = expenses.map((e) => ({
     'Expense ID': e.id,

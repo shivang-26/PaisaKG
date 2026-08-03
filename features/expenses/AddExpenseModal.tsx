@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { CATEGORIES } from '@/lib/constants';
 import { ExpenseCategoryKey } from '@/lib/types';
-import { compressImage } from '@/lib/utils';
+import { compressImage, triggerHaptic } from '@/lib/utils';
 import {
   X,
   PlusCircle,
@@ -86,6 +86,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
         receiptImage: receiptImage || undefined,
       });
 
+      triggerHaptic([30, 50, 30]);
       resetForm();
       onClose();
     } catch (err: any) {

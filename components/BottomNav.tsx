@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useApp } from '@/context/AppContext';
+import { triggerHaptic } from '@/lib/utils';
 import {
   LayoutDashboard,
   Receipt,
@@ -58,7 +59,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenScanModal }) => {
               <div key={tab.id} className="relative -top-5">
                 <button
                   id="bottom-nav-scan-btn"
-                  onClick={() => onOpenScanModal('camera')}
+                  onClick={() => {
+                    triggerHaptic([20, 30, 20]);
+                    onOpenScanModal('camera');
+                  }}
                   className="w-14 h-14 rounded-full bg-[#0a452b] text-white flex flex-col items-center justify-center shadow-lg hover:bg-[#07331f] hover:scale-105 active:scale-95 transition-all ring-4 ring-[#e5e9d3]"
                   aria-label="Scan Receipt"
                 >
@@ -73,7 +77,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenScanModal }) => {
             <button
               key={tab.id}
               id={`bottom-nav-tab-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                triggerHaptic(10);
+                setActiveTab(tab.id);
+              }}
               className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
                 isActive
                   ? 'text-[#0a452b] font-bold scale-105'

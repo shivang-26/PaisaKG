@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { CATEGORIES } from '@/lib/constants';
 import { ExpenseCategoryKey, OCRItemResult, OCRResult } from '@/lib/types';
-import { compressImage } from '@/lib/utils';
+import { compressImage, triggerHaptic } from '@/lib/utils';
 import {
   Camera,
   Upload,
@@ -131,6 +131,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
         );
 
         setStep('review');
+        triggerHaptic([20, 30, 20]);
       } catch (err: any) {
         console.error('OCR scan failed:', err);
         // Fallback with defaults for user manual review
@@ -170,6 +171,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   if (!isOpen) return null;
 
   const capturePhoto = () => {
+    triggerHaptic(30);
     if (!videoRef.current) return;
     const video = videoRef.current;
     const canvas = document.createElement('canvas');
@@ -188,6 +190,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    triggerHaptic(15);
     try {
       const base64 = await compressImage(file, 1000);
       stopCamera();
@@ -199,10 +202,12 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   };
 
   const handleAddItem = () => {
+    triggerHaptic(10);
     setItems([...items, { name: 'Item Name', qty: 1, price: 0 }]);
   };
 
   const handleRemoveItem = (index: number) => {
+    triggerHaptic(10);
     setItems(items.filter((_, i) => i !== index));
   };
 
@@ -228,6 +233,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
       items: items.length > 0 ? items : undefined,
     });
 
+    triggerHaptic([30, 50, 30]);
     onClose();
     resetModal();
   };

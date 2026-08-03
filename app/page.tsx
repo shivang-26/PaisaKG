@@ -14,6 +14,7 @@ import { ReportsView } from '@/features/reports/ReportsView';
 import { FamilyManagerView } from '@/features/family/FamilyManagerView';
 import { ProfileView } from '@/features/profile/ProfileView';
 import { Expense } from '@/lib/types';
+import { triggerHaptic } from '@/lib/utils';
 import { Sparkles, ShieldCheck, Wallet } from 'lucide-react';
 
 const emptySubscribe = () => () => {};
@@ -189,6 +190,7 @@ function MainApp() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
   const handleOpenScanModal = (mode: 'camera' | 'gallery' = 'camera') => {
+    triggerHaptic([15, 30, 15]);
     if (typeof window !== 'undefined') {
       window.history.pushState(
         { paisaApp: true, tab: activeTab, modal: 'scan', scanMode: mode },
@@ -200,6 +202,7 @@ function MainApp() {
   };
 
   const handleCloseScanModal = () => {
+    triggerHaptic(10);
     if (typeof window !== 'undefined' && window.history.state?.modal === 'scan') {
       window.history.back();
     } else {
@@ -208,6 +211,7 @@ function MainApp() {
   };
 
   const handleOpenAddModal = () => {
+    triggerHaptic(15);
     if (typeof window !== 'undefined') {
       window.history.pushState(
         { paisaApp: true, tab: activeTab, modal: 'add' },
@@ -219,6 +223,7 @@ function MainApp() {
   };
 
   const handleCloseAddModal = () => {
+    triggerHaptic(10);
     if (typeof window !== 'undefined' && window.history.state?.modal === 'add') {
       window.history.back();
     } else {
@@ -227,6 +232,7 @@ function MainApp() {
   };
 
   const handleSelectExpense = (expense: Expense | null) => {
+    triggerHaptic(10);
     if (expense) {
       setSelectedExpense(expense);
       setActiveTab('expenses');
