@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { db, seedInitialData } from '@/lib/db';
 import {
+  ActiveSessionInfo,
+  BroadcastNotification,
   Expense,
   ExpenseCategoryKey,
   Family,
@@ -840,6 +842,145 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await refreshData();
   };
 
+  // Heartbeat & Session Tracker for Admin Analytics
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const recordUserBackup = async () => {
+      try {
+        const users = await db.users.toArray();
+        if (users.length > 0) {
+          localStorage.setItem('paisa_shared_users_backup', JSON.stringify(users));
+        }
+      } catch (e) {
+        console.warn('User backup sync notice:', e);
+      }
+    };
+
+    recordUserBackup();
+
+    const updateHeartbeat = (status: 'active' | 'left' = 'active') => {
+      try {
+        const currentSessionsStr = localStorage.getItem('paisa_active_sessions') || '{}';
+        const sessions: Record<string, ActiveSessionInfo> = JSON.parse(currentSessionsStr);
+
+        const nowIso = new Date().toISOString();
+        const currentMember = familyMembers.find((m) => m.userId === currentUser.id);
+
+        sessions[currentUser.id] = {
+          userId: currentUser.id,
+          email: currentUser.email,
+          fullName: currentUser.fullName,
+          avatarUrl: currentUser.avatarUrl,
+          familyId: currentFamily?.id,
+          familyName: currentFamily?.name,
+          role: currentMember?.role || 'Member',
+          status: status,
+          lastActiveAt: nowIso,
+          leftAt: status === 'left' ? nowIso : sessions[currentUser.id]?.leftAt,
+          deviceInfo: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+          totalExpensesCount: expenses.length,
+          totalAmountSpent: expenses.reduce((sum, e) => sum + e.amount, 0),
+        };
+
+        localStorage.setItem('paisa_active_sessions', JSON.stringify(sessions));
+      } catch (e) {
+        console.warn('Heartbeat update failed:', e);
+      }
+    };
+
+    updateHeartbeat('active');
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        updateHeartbeat('active');
+      } else {
+        updateHeartbeat('left');
+      }
+    }, 15000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        updateHeartbeat('left');
+      } else {
+        updateHeartbeat('active');
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      updateHeartbeat('left');
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [currentUser, currentFamily, familyMembers, expenses]);
+
+  // Broadcast Push Notifications Listener
+  const [activePushNotification, setActivePushNotification] = useState<BroadcastNotification | null>(null);
+
+  useEffect(() => {
+    const checkNotifications = () => {
+      try {
+        const raw = localStorage.getItem('paisa_broadcast_notifications');
+        if (!raw) return;
+        const list: BroadcastNotification[] = JSON.parse(raw);
+        if (list.length === 0) return;
+
+        const key = `paisa_dismissed_notifs_${currentUser?.id || 'guest'}`;
+        const dismissedStr = localStorage.getItem(key) || '[]';
+        const dismissedIds: string[] = JSON.parse(dismissedStr);
+
+        const latest = list.find((n) => {
+          if (dismissedIds.includes(n.id)) return false;
+          if (n.targetAudience === 'ALL') return true;
+          if (n.targetAudience === 'ACTIVE_ONLY') return true;
+          if (n.targetAudience === 'FAMILY' && n.targetId === currentFamily?.id) return true;
+          if (n.targetAudience === 'USER' && n.targetId === currentUser?.id) return true;
+          return false;
+        });
+
+        if (latest && (!activePushNotification || activePushNotification.id !== latest.id)) {
+          setActivePushNotification(latest);
+          if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+            navigator.vibrate([30, 50, 30, 50]);
+          }
+        }
+      } catch (e) {
+        console.warn('Notification processing notice:', e);
+      }
+    };
+
+    checkNotifications();
+    const interval = setInterval(checkNotifications, 3000);
+    window.addEventListener('storage', checkNotifications);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', checkNotifications);
+    };
+  }, [currentUser, currentFamily, activePushNotification]);
+
+  const dismissPushNotification = (notifId: string) => {
+    try {
+      const key = `paisa_dismissed_notifs_${currentUser?.id || 'guest'}`;
+      const dismissedStr = localStorage.getItem(key) || '[]';
+      const dismissedIds: string[] = JSON.parse(dismissedStr);
+      if (!dismissedIds.includes(notifId)) {
+        dismissedIds.push(notifId);
+        localStorage.setItem(key, JSON.stringify(dismissedIds));
+      }
+    } catch (e) {
+      console.warn('Error dismissing notification:', e);
+    }
+    setActivePushNotification(null);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -883,6 +1024,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         refreshData,
       }}
     >
+      {/* Real-time Admin Push Notification Banner */}
+      {activePushNotification && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-[92%] max-w-md animate-in slide-in-from-top-4 duration-300">
+          <div className="p-4 rounded-2xl bg-[#0d1f15] text-white shadow-2xl border-2 border-emerald-500/40 backdrop-blur-md flex items-start gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
+              <span className="text-lg">🔔</span>
+            </div>
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                  {activePushNotification.category || 'Notification'}
+                </span>
+                <span className="text-[10px] text-slate-400">Admin Push</span>
+              </div>
+              <h4 className="text-sm font-bold text-white leading-tight">
+                {activePushNotification.title}
+              </h4>
+              <p className="text-xs text-slate-200 leading-normal">
+                {activePushNotification.body}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => dismissPushNotification(activePushNotification.id)}
+              className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white transition-all shrink-0 text-xs font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       {children}
     </AppContext.Provider>
   );

@@ -99,3 +99,32 @@ export interface SyncQueueItem {
   data: any;
   timestamp: string;
 }
+
+export interface ActiveSessionInfo {
+  userId: string;
+  email: string;
+  fullName: string;
+  avatarUrl?: string;
+  familyId?: string;
+  familyName?: string;
+  role?: string;
+  status: 'active' | 'left';
+  lastActiveAt: string;
+  leftAt?: string;
+  deviceInfo?: string;
+  totalExpensesCount?: number;
+  totalAmountSpent?: number;
+}
+
+export interface BroadcastNotification {
+  id: string;
+  title: string;
+  body: string;
+  category: 'info' | 'alert' | 'budget' | 'system';
+  targetAudience: 'ALL' | 'ACTIVE_ONLY' | 'FAMILY' | 'USER';
+  targetId?: string;
+  actionUrl?: string;
+  sentAt: string;
+  sentBy: string;
+}
+
