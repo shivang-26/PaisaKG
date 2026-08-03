@@ -950,6 +950,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (typeof window !== 'undefined' && 'vibrate' in navigator) {
             navigator.vibrate([30, 50, 30, 50]);
           }
+
+          // Trigger OS / ServiceWorker System Notification (Works when minimized or in background)
+          if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+              navigator.serviceWorker.ready.then((reg) => {
+                reg.showNotification(latest.title, {
+                  body: latest.body,
+                  icon: '/logo.svg',
+                  badge: '/logo.svg',
+                  tag: latest.id,
+                  vibrate: [200, 100, 200],
+                } as NotificationOptions);
+              }).catch(() => {
+                try {
+                  new Notification(latest.title, { body: latest.body, icon: '/logo.svg' });
+                } catch (e) {
+                  console.warn('System Notification fallback failed:', e);
+                }
+              });
+            } else {
+              try {
+                new Notification(latest.title, { body: latest.body, icon: '/logo.svg' });
+              } catch (e) {
+                console.warn('System Notification error:', e);
+              }
+            }
+          }
         }
       } catch (e) {
         console.warn('Notification processing notice:', e);

@@ -173,12 +173,29 @@ export default function AdminPage() {
       localStorage.setItem('paisa_broadcast_notifications', JSON.stringify(updatedList));
       setSentNotifications(updatedList);
 
-      // Trigger browser native push if granted
+      // Trigger browser native system push via Service Worker
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-        new Notification(pushTitle.trim(), {
-          body: pushBody.trim(),
-          icon: '/icon-192.png',
-        });
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification(pushTitle.trim(), {
+              body: pushBody.trim(),
+              icon: '/logo.svg',
+              badge: '/logo.svg',
+              tag: newNotif.id,
+              vibrate: [200, 100, 200],
+            } as NotificationOptions);
+          }).catch(() => {
+            new Notification(pushTitle.trim(), {
+              body: pushBody.trim(),
+              icon: '/logo.svg',
+            });
+          });
+        } else {
+          new Notification(pushTitle.trim(), {
+            body: pushBody.trim(),
+            icon: '/logo.svg',
+          });
+        }
       }
 
       triggerHaptic([30, 50, 30, 50]);
