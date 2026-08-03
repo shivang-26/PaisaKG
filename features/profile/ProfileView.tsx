@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { UserAvatar } from '@/components/UserAvatar';
 import {
   User,
   Mail,
@@ -14,16 +15,8 @@ import {
   RefreshCw,
   Sliders,
   AlertCircle,
+  Trash2,
 } from 'lucide-react';
-
-const PRESET_AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-];
 
 export const ProfileView: React.FC = () => {
   const {
@@ -98,7 +91,7 @@ export const ProfileView: React.FC = () => {
       await updateUserProfile({
         fullName: fullNameInput.trim(),
         email: emailInput.trim(),
-        avatarUrl: avatarUrlInput.trim() || '/logo.svg',
+        avatarUrl: avatarUrlInput.trim(),
       });
 
       if (geminiKeyInput.trim() !== (currentUser?.geminiApiKey || '')) {
@@ -146,10 +139,11 @@ export const ProfileView: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 relative z-10">
           {/* Avatar Display */}
           <div className="relative group shrink-0">
-            <img
-              src={avatarUrlInput || currentUser.avatarUrl || 'https://picsum.photos/150'}
-              alt={currentUser.fullName}
-              className="w-20 h-20 rounded-2xl object-cover ring-4 ring-white/20 shadow-lg bg-[#07331f]"
+            <UserAvatar
+              src={avatarUrlInput || currentUser.avatarUrl}
+              name={currentUser.fullName}
+              className="w-20 h-20 rounded-2xl text-2xl"
+              iconClassName="w-8 h-8"
             />
             <label
               htmlFor="avatar-file-input"
@@ -245,63 +239,53 @@ export const ProfileView: React.FC = () => {
           </div>
         </div>
 
-        {/* Avatar Selection Section */}
+        {/* Profile Picture Section */}
         <div className="space-y-2 pt-2">
-          <label className="text-xs font-bold text-[#0d1f15] block">Profile Picture / Avatar</label>
+          <label className="text-xs font-bold text-[#0d1f15] block">Profile Picture</label>
 
-          {/* Avatar Presets */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {PRESET_AVATARS.map((url, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setAvatarUrlInput(url)}
-                className={`relative w-11 h-11 rounded-xl overflow-hidden border-2 transition-all ${
-                  avatarUrlInput === url
-                    ? 'border-[#0a452b] ring-2 ring-[#0a452b]/40 scale-105'
-                    : 'border-[#d5dbcb] opacity-75 hover:opacity-100'
-                }`}
-              >
-                <img src={url} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover" />
-                {avatarUrlInput === url && (
-                  <div className="absolute inset-0 bg-[#0a452b]/40 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                )}
-              </button>
-            ))}
-
-            {/* Upload Custom File Button */}
-            <label
-              htmlFor="avatar-file-input-btn"
-              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white border border-[#d5dbcb] text-xs font-bold text-[#0a452b] hover:bg-[#e5e9d3] cursor-pointer shadow-xs transition-colors"
-            >
-              {isUploading ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Upload className="w-3.5 h-3.5" />
-              )}
-              <span>Upload Photo</span>
-              <input
-                id="avatar-file-input-btn"
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          {/* Manual Avatar Image URL */}
-          <div className="pt-2">
-            <input
-              type="url"
-              value={avatarUrlInput}
-              onChange={(e) => setAvatarUrlInput(e.target.value)}
-              placeholder="Or paste image URL (e.g. https://...)"
-              className="w-full px-3.5 py-2 text-xs font-mono bg-white border border-[#d5dbcb] rounded-xl text-[#0d1f15] focus:outline-none focus:ring-2 focus:ring-[#0a452b]"
+          <div className="flex items-center gap-3">
+            <UserAvatar
+              src={avatarUrlInput}
+              name={fullNameInput}
+              className="w-12 h-12 rounded-2xl text-lg"
+              iconClassName="w-5 h-5"
             />
+
+            <div className="flex flex-wrap items-center gap-2">
+              <label
+                htmlFor="avatar-file-input-btn"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#d5dbcb] text-xs font-bold text-[#0a452b] hover:bg-[#e5e9d3] cursor-pointer shadow-2xs transition-colors"
+              >
+                {isUploading ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Upload className="w-3.5 h-3.5" />
+                )}
+                <span>Upload Photo</span>
+                <input
+                  id="avatar-file-input-btn"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+
+              {avatarUrlInput ? (
+                <button
+                  type="button"
+                  onClick={() => setAvatarUrlInput('')}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-xs font-bold text-rose-700 hover:bg-rose-50 shadow-2xs transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Remove Photo</span>
+                </button>
+              ) : null}
+            </div>
           </div>
+          <p className="text-[11px] text-slate-500">
+            Upload your personal profile picture (JPG, PNG or WEBP, max 4MB). If no photo is uploaded, default white & grey initials avatar will be shown.
+          </p>
         </div>
 
         {/* Gemini API Key Section */}

@@ -233,7 +233,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: newUserId,
         email: cleanEmail,
         fullName: fullName?.trim() || cleanEmail.split('@')[0],
-        avatarUrl: '/logo.svg',
+        avatarUrl: '',
         createdAt: new Date().toISOString(),
       };
       await db.users.add(user);
@@ -773,7 +773,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: generateId('usr'),
         email: cleanEmail,
         fullName: fullName || cleanEmail.split('@')[0],
-        avatarUrl: `https://picsum.photos/seed/${cleanEmail}/100/100`,
+        avatarUrl: '',
         createdAt: new Date().toISOString(),
       };
       await db.users.add(user);

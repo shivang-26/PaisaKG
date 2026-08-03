@@ -239,7 +239,144 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
     setMerchant('');
     setAmount('');
     setItems([]);
-  };
+  };  if (step === 'camera') {
+    return (
+      <div className="fixed inset-0 z-50 bg-black text-white flex flex-col justify-between overflow-hidden select-none animate-in fade-in duration-200 h-screen w-screen">
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Top Floating Bar */}
+        <div className="absolute top-0 inset-x-0 z-30 p-4 pt-5 flex items-center justify-between bg-gradient-to-b from-black/90 via-black/50 to-transparent">
+          <button
+            type="button"
+            onClick={() => {
+              stopCamera();
+              onClose();
+              resetModal();
+            }}
+            className="p-2.5 rounded-full bg-black/60 text-white hover:bg-black/90 backdrop-blur-md transition-all border border-white/10 shadow-lg"
+            title="Close Scanner"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 border border-white/10 backdrop-blur-md text-white text-xs font-bold shadow-lg">
+            <ScanLine className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <span>Scan Receipt / Bill</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              stopCamera();
+              setStep('gallery');
+              fileInputRef.current?.click();
+            }}
+            className="px-3.5 py-2 rounded-full bg-black/60 hover:bg-black/90 text-white text-xs font-bold border border-white/10 backdrop-blur-md flex items-center gap-1.5 transition-all shadow-lg"
+          >
+            <Upload className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Gallery</span>
+          </button>
+        </div>
+
+        {/* Center Camera Viewfinder Container */}
+        <div className="relative w-full h-full flex-1 flex items-center justify-center overflow-hidden bg-black">
+          {!cameraError ? (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+
+              {/* Paytm-style Scanner Square Frame Overlay */}
+              <div className="relative w-[86vw] max-w-xs sm:max-w-sm h-[56vh] max-h-[460px] rounded-3xl border border-white/20 shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] flex flex-col justify-between p-4 pointer-events-none z-10">
+                {/* 4 Corner L-brackets */}
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-2xl shadow-[0_0_10px_#10b981]" />
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-2xl shadow-[0_0_10px_#10b981]" />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-2xl shadow-[0_0_10px_#10b981]" />
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-2xl shadow-[0_0_10px_#10b981]" />
+
+                {/* Laser animation */}
+                <div className="w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#10b981] animate-bounce my-auto" />
+
+                <div className="mt-auto text-center">
+                  <span className="inline-block bg-black/70 text-white text-xs font-semibold px-4 py-1.5 rounded-full backdrop-blur-md border border-white/10 shadow-lg">
+                    Align bill or receipt inside frame
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="p-6 text-center text-white space-y-4 max-w-xs z-10">
+              <div className="w-16 h-16 rounded-3xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto shadow-lg">
+                <Camera className="w-8 h-8" />
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-white">Camera Access Restricted</h4>
+                <p className="text-xs text-slate-300 mt-1">
+                  Live camera stream is restricted or not permitted on this browser. You can select a photo file directly from your gallery.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-3 rounded-2xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-xl transition-all flex items-center justify-center gap-2"
+              >
+                <Upload className="w-4 h-4 text-emerald-400" />
+                Select Receipt Image File
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Shutter Toolbar */}
+        <div className="absolute bottom-0 inset-x-0 z-30 p-6 pb-10 flex items-center justify-around bg-gradient-to-t from-black/95 via-black/60 to-transparent">
+          <button
+            type="button"
+            onClick={() => {
+              stopCamera();
+              setStep('gallery');
+              fileInputRef.current?.click();
+            }}
+            className="w-12 h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg active:scale-95 transition-all"
+            title="Upload from Gallery"
+          >
+            <Upload className="w-5 h-5 text-emerald-400" />
+          </button>
+
+          {/* Paytm-style large green shutter button */}
+          <button
+            type="button"
+            onClick={capturePhoto}
+            className="w-20 h-20 rounded-full border-4 border-white/90 bg-white/20 backdrop-blur-xs flex items-center justify-center shadow-2xl active:scale-90 transition-transform p-1 cursor-pointer"
+            title="Snap Photo"
+          >
+            <div className="w-full h-full rounded-full bg-[#0a452b] hover:bg-[#07331f] flex items-center justify-center text-white shadow-inner">
+              <Camera className="w-8 h-8" />
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => startCamera()}
+            className="w-12 h-12 rounded-full bg-black/60 hover:bg-black/90 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg active:scale-95 transition-all"
+            title="Refresh Camera"
+          >
+            <RefreshCw className="w-5 h-5 text-emerald-400" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-[#e5e9d3] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
@@ -340,109 +477,6 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
             <div className="mb-4 p-3 rounded-xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {/* STEP 1: LIVE CAMERA VIEW */}
-          {step === 'camera' && (
-            <div className="space-y-4">
-              <div className="relative rounded-2xl overflow-hidden bg-slate-950 border-2 border-[#0a452b] shadow-lg flex flex-col items-center justify-center min-h-[260px] sm:min-h-[300px]">
-                {!cameraError ? (
-                  <>
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-[260px] sm:h-[300px] object-cover"
-                    />
-                    {/* Camera Viewfinder Overlay Frame */}
-                    <div className="absolute inset-4 sm:inset-6 border-2 border-dashed border-white/60 rounded-xl pointer-events-none flex items-center justify-center">
-                      <span className="bg-black/40 text-white/90 text-[10px] font-medium px-2.5 py-1 rounded-full backdrop-blur-xs">
-                        Align Receipt within Frame
-                      </span>
-                    </div>
-
-                    {/* Bottom Action bar over camera */}
-                    <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-3 px-4">
-                      <button
-                        type="button"
-                        onClick={capturePhoto}
-                        className="px-6 py-2.5 rounded-full bg-[#0a452b] hover:bg-[#062c1b] text-white font-bold text-xs shadow-xl flex items-center gap-2 border border-emerald-400/30 transition-all transform active:scale-95"
-                      >
-                        <Camera className="w-4 h-4" />
-                        Snap Photo Now
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          stopCamera();
-                          setStep('gallery');
-                          fileInputRef.current?.click();
-                        }}
-                        className="p-2.5 rounded-full bg-white/90 hover:bg-white text-slate-800 text-xs font-bold shadow-md transition-all backdrop-blur-xs"
-                        title="Upload from Gallery instead"
-                      >
-                        <Upload className="w-4 h-4 text-[#0a452b]" />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="p-6 text-center text-white space-y-3">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto">
-                      <Camera className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-white">Camera Access Unavailable</h4>
-                      <p className="text-xs text-slate-400 max-w-xs mx-auto mt-1">
-                        Live video stream is restricted or not permitted on this browser. You can select a receipt photo file directly.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-5 py-2.5 rounded-xl bg-[#0a452b] hover:bg-[#07331f] text-white text-xs font-bold shadow-md transition-all inline-flex items-center gap-2"
-                    >
-                      <Upload className="w-4 h-4" />
-                      Select Receipt Image File
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Quick toggle bar */}
-              <div className="flex items-center justify-between text-xs px-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    stopCamera();
-                    setStep('gallery');
-                    fileInputRef.current?.click();
-                  }}
-                  className="font-semibold text-[#0a452b] hover:underline flex items-center gap-1.5"
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  Upload from Gallery instead
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-slate-500 hover:text-slate-800 font-medium"
-                >
-                  Choose File...
-                </button>
-              </div>
-
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
             </div>
           )}
 
@@ -554,13 +588,48 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
                 {selectedImage && (
                   <button
                     onClick={() => setShowEnlargedImage(true)}
-                    className="p-1.5 rounded-lg bg-white hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center gap-1 shadow-sm shrink-0 border border-[#d5dbcb]"
+                    className="p-1.5 rounded-lg bg-white hover:bg-[#e5e9d3] text-[#0d1f15] text-xs font-bold flex items-center gap-1 shadow-xs shrink-0 border border-[#d5dbcb]"
                   >
-                    <Eye className="w-3.5 h-3.5" />
+                    <Eye className="w-3.5 h-3.5 text-[#0a452b]" />
                     View Photo
                   </button>
                 )}
               </div>
+
+              {/* Scanned Receipt Photo Card */}
+              {selectedImage && (
+                <div className="p-3 bg-white border border-[#d5dbcb] rounded-2xl space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-[#0d1f15] flex items-center gap-1.5">
+                      <Receipt className="w-4 h-4 text-[#0a452b]" />
+                      Uploaded Bill / Receipt Photo
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowEnlargedImage(true)}
+                      className="px-2.5 py-1 rounded-lg bg-[#f2f5e8] hover:bg-[#e5e9d3] text-[#0a452b] text-[11px] font-bold flex items-center gap-1 border border-[#d5dbcb] transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      Open Full Photo
+                    </button>
+                  </div>
+
+                  <div
+                    onClick={() => setShowEnlargedImage(true)}
+                    className="relative group cursor-pointer rounded-xl overflow-hidden border border-[#d5dbcb] bg-black max-h-52 flex items-center justify-center shadow-inner"
+                  >
+                    <img
+                      src={selectedImage}
+                      alt="Scanned Receipt"
+                      className="max-h-52 w-full object-contain group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-xs gap-2 backdrop-blur-xs">
+                      <Eye className="w-5 h-5 text-emerald-400" />
+                      <span>Tap to inspect photo</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Editable Fields Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -765,22 +834,53 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
       {/* Enlarged Receipt Photo Lightbox */}
       {showEnlargedImage && selectedImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 animate-in fade-in duration-200 select-none"
           onClick={() => setShowEnlargedImage(false)}
         >
-          <div className="relative max-w-lg max-h-[85vh]">
+          {/* Top Bar */}
+          <div
+            className="w-full max-w-3xl flex items-center justify-between text-white z-10 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-emerald-400" />
+              <span className="font-bold text-sm">Receipt / Bill Photo Preview</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={selectedImage}
+                download="receipt-photo.jpg"
+                className="px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Upload className="w-3.5 h-3.5 rotate-180" />
+                Download
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowEnlargedImage(false)}
+                className="p-2 bg-white/20 hover:bg-white/40 text-white rounded-full transition-colors shadow-sm"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Enlarged Center Image */}
+          <div
+            className="relative flex-1 w-full max-w-4xl flex items-center justify-center p-2 my-2 overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <img
               src={selectedImage}
               alt="Enlarged Receipt"
-              className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl"
+              className="max-w-full max-h-[82vh] rounded-2xl object-contain shadow-2xl border border-white/10 bg-slate-950"
             />
-            <button
-              onClick={() => setShowEnlargedImage(false)}
-              className="absolute -top-3 -right-3 p-2 bg-white text-slate-900 rounded-full shadow-lg"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
+
+          <p className="text-xs text-slate-400 z-10 pb-2">
+            Click anywhere outside or press Close to return
+          </p>
         </div>
       )}
     </div>

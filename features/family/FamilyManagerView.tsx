@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { UserAvatar } from '@/components/UserAvatar';
 import { exportExpensesCSV, formatAmount } from '@/lib/utils';
 import {
   Users,
@@ -244,10 +245,11 @@ export const FamilyManagerView: React.FC = () => {
               className="p-3 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between gap-3 text-xs"
             >
               <div className="flex items-center gap-2.5">
-                <img
-                  src={member.avatarUrl || 'https://picsum.photos/100'}
-                  alt={member.fullName}
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-[#0a452b]/20"
+                <UserAvatar
+                  src={member.avatarUrl}
+                  name={member.fullName}
+                  className="w-9 h-9 rounded-full text-xs"
+                  iconClassName="w-4 h-4"
                 />
                 <div>
                   <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { UserAvatar } from '@/components/UserAvatar';
 import { CATEGORIES } from '@/lib/constants';
 import { exportExpensesCSV, formatAmount } from '@/lib/utils';
 import {
@@ -369,10 +370,11 @@ export const ReportsView: React.FC = () => {
                   className="p-3 rounded-2xl bg-white border border-[#d5dbcb] flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-2.5">
-                    <img
-                      src={memberObj?.avatarUrl || 'https://picsum.photos/100'}
-                      alt={spender.name}
-                      className="w-8 h-8 rounded-full object-cover"
+                    <UserAvatar
+                      src={memberObj?.avatarUrl}
+                      name={spender.name}
+                      className="w-8 h-8 rounded-full text-xs"
+                      iconClassName="w-3.5 h-3.5"
                     />
                     <div>
                       <p className="font-bold text-[#0d1f15]">

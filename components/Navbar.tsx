@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Logo } from '@/components/Logo';
+import { UserAvatar } from '@/components/UserAvatar';
 import {
   Moon,
   Sun,
@@ -81,10 +82,11 @@ export const Navbar: React.FC = () => {
                 onClick={() => setShowMemberMenu(!showMemberMenu)}
                 className="flex items-center gap-2 p-1.5 pl-2 pr-2.5 rounded-xl border border-[#d5dbcb] bg-white hover:bg-[#e5e9d3] transition-colors shadow-sm"
               >
-                <img
-                  src={currentUser.avatarUrl || 'https://picsum.photos/100'}
-                  alt={currentUser.fullName}
-                  className="w-7 h-7 rounded-full object-cover ring-2 ring-[#0a452b]/30"
+                <UserAvatar
+                  src={currentUser.avatarUrl}
+                  name={currentUser.fullName}
+                  className="w-7 h-7 rounded-full text-[11px]"
+                  iconClassName="w-3.5 h-3.5"
                 />
                 <span className="text-xs font-bold text-[#0d1f15] hidden md:inline">
                   {currentUser.fullName.split(' ')[0]}
@@ -122,10 +124,11 @@ export const Navbar: React.FC = () => {
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <img
-                            src={m.avatarUrl || 'https://picsum.photos/100'}
-                            alt={m.fullName}
-                            className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200"
+                          <UserAvatar
+                            src={m.avatarUrl}
+                            name={m.fullName}
+                            className="w-7 h-7 rounded-full text-[11px]"
+                            iconClassName="w-3.5 h-3.5"
                           />
                           <div>
                             <p className="text-xs font-semibold leading-tight">{m.fullName}</p>

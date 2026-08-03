@@ -30,6 +30,8 @@ import {
   ChevronDown,
   Sparkles,
   ArrowLeft,
+  Eye,
+  Upload,
 } from 'lucide-react';
 
 interface ExpenseListProps {
@@ -54,6 +56,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
   const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
   const [showFilters, setShowFilters] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [enlargedReceiptUrl, setEnlargedReceiptUrl] = useState<string | null>(null);
 
   // Edit form state
   const [editMerchant, setEditMerchant] = useState('');
@@ -213,6 +216,44 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
         </button>
       </div>
 
+      {/* Quick Category Filter Bar */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-0.5">
+        <button
+          type="button"
+          onClick={() => setSelectedCategory('ALL')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1 border ${
+            selectedCategory === 'ALL'
+              ? 'bg-[#0a452b] text-white border-[#07331f] shadow-2xs'
+              : 'bg-[#f2f5e8] text-slate-700 border-[#d5dbcb] hover:bg-[#e5e9d3]'
+          }`}
+        >
+          <Receipt className="w-3.5 h-3.5" />
+          All Categories
+        </button>
+        {Object.values(CATEGORIES).map((cat) => {
+          const CatIcon = getCategoryIcon(cat.iconName);
+          const isSelected = selectedCategory === cat.key;
+          return (
+            <button
+              key={cat.key}
+              type="button"
+              onClick={() => setSelectedCategory(isSelected ? 'ALL' : cat.key)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 border ${
+                isSelected
+                  ? 'bg-[#0a452b] text-white border-[#07331f] shadow-2xs'
+                  : 'bg-white text-slate-700 border-[#d5dbcb] hover:bg-[#f2f5e8]'
+              }`}
+            >
+              <CatIcon
+                className="w-3.5 h-3.5 shrink-0"
+                style={{ color: isSelected ? '#ffffff' : cat.color }}
+              />
+              <span>{cat.name}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Expandable Filter Drawer */}
       {showFilters && (
         <div className="p-4 bg-[#f2f5e8] rounded-3xl border border-[#d5dbcb] space-y-3 animate-in fade-in duration-150">
@@ -283,14 +324,14 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
               <div
                 key={expense.id}
                 onClick={() => onSelectExpense(expense)}
-                className="p-3.5 rounded-2xl bg-[#f2f5e8] border border-[#d5dbcb] hover:border-[#0a452b] shadow-sm transition-all cursor-pointer flex items-center justify-between gap-3 group"
+                className="p-3.5 rounded-2xl bg-[#f2f5e8] border border-[#d5dbcb] hover:border-[#0a452b] shadow-2xs hover:shadow-xs transition-all cursor-pointer flex items-center justify-between gap-3 group"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3.5 min-w-0">
                   <div
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 text-white shadow-sm"
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 text-white shadow-2xs group-hover:scale-105 transition-transform"
                     style={{ backgroundColor: catInfo.color }}
                   >
-                    <IconComp className="w-5 h-5" />
+                    <IconComp className="w-5.5 h-5.5" />
                   </div>
 
                   <div className="min-w-0">
@@ -314,12 +355,16 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
+                <div className="text-right shrink-0 flex flex-col items-end gap-1">
                   <p className="text-sm font-extrabold text-[#0d1f15] group-hover:text-[#0a452b] transition-colors">
                     {formatAmount(expense.amount, expense.currency)}
                   </p>
-                  <span className="inline-block text-[10px] font-semibold text-slate-500">
-                    {expense.category}
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-2xs border border-[#d5dbcb]/60"
+                    style={{ backgroundColor: catInfo.bgLight, color: catInfo.color }}
+                  >
+                    <IconComp className="w-3 h-3 shrink-0" />
+                    {catInfo.name}
                   </span>
                 </div>
               </div>
@@ -454,95 +499,128 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
               </div>
             ) : (
               /* VIEW DISPLAY */
-              <div className="space-y-4">
-                <div className="text-center p-6 rounded-2xl bg-gradient-to-b from-[#f2f5e8] to-[#e5e9d3] border border-[#d5dbcb] shadow-xs">
-                  <p className="text-xs uppercase font-bold text-[#0a452b] tracking-wider">
-                    Amount Paid
-                  </p>
-                  <p className="text-4xl font-black text-[#0d1f15] mt-1.5">
-                    {formatAmount(selectedExpense.amount, selectedExpense.currency)}
-                  </p>
-                  <span className="inline-block px-4 py-1 rounded-full bg-[#0a452b] text-white text-xs font-bold mt-3 shadow-xs">
-                    {selectedExpense.category}
-                  </span>
-                </div>
+              (() => {
+                const selCat = CATEGORIES[selectedExpense.category] || CATEGORIES.Others;
+                const SelIcon = getCategoryIcon(selCat.iconName);
+                return (
+                  <div className="space-y-4">
+                    <div className="text-center p-6 rounded-2xl bg-gradient-to-b from-[#f2f5e8] to-[#e5e9d3] border border-[#d5dbcb] shadow-xs flex flex-col items-center">
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-xs mb-2"
+                        style={{ backgroundColor: selCat.color }}
+                      >
+                        <SelIcon className="w-6 h-6" />
+                      </div>
+                      <p className="text-xs uppercase font-bold text-[#0a452b] tracking-wider">
+                        Amount Paid
+                      </p>
+                      <p className="text-4xl font-black text-[#0d1f15] mt-1">
+                        {formatAmount(selectedExpense.amount, selectedExpense.currency)}
+                      </p>
+                      <span
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold mt-3 shadow-2xs border border-[#d5dbcb]/60"
+                        style={{ backgroundColor: selCat.bgLight, color: selCat.color }}
+                      >
+                        <SelIcon className="w-3.5 h-3.5" />
+                        {selCat.name}
+                      </span>
+                    </div>
 
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
-                    <p className="text-slate-500 font-medium">Merchant</p>
-                    <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
-                      {selectedExpense.merchant}
-                    </p>
-                  </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                        <p className="text-slate-500 font-medium">Merchant</p>
+                        <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
+                          {selectedExpense.merchant}
+                        </p>
+                      </div>
 
-                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
-                    <p className="text-slate-500 font-medium">Date</p>
-                    <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
-                      {formatDate(selectedExpense.expenseDate)}
-                    </p>
-                  </div>
+                      <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                        <p className="text-slate-500 font-medium">Date</p>
+                        <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
+                          {formatDate(selectedExpense.expenseDate)}
+                        </p>
+                      </div>
 
-                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
-                    <p className="text-slate-500 font-medium">Paid By</p>
-                    <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
-                      {selectedExpense.createdByName}
-                    </p>
-                  </div>
+                      <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                        <p className="text-slate-500 font-medium">Paid By</p>
+                        <p className="font-bold text-[#0d1f15] mt-0.5 text-sm">
+                          {selectedExpense.createdByName}
+                        </p>
+                      </div>
 
-                  <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
-                    <p className="text-slate-500 font-medium">Sync Status</p>
-                    <p className="font-bold text-[#0a452b] mt-0.5 text-sm">
-                      {selectedExpense.synced ? 'Synced to Cloud' : 'Saved Offline'}
-                    </p>
-                  </div>
-                </div>
+                      <div className="p-3.5 bg-white border border-[#d5dbcb] rounded-xl shadow-2xs">
+                        <p className="text-slate-500 font-medium">Sync Status</p>
+                        <p className="font-bold text-[#0a452b] mt-0.5 text-sm">
+                          {selectedExpense.synced ? 'Synced to Cloud' : 'Saved Offline'}
+                        </p>
+                      </div>
+                    </div>
 
-                {selectedExpense.notes && (
-                  <div className="p-4 bg-white border border-[#d5dbcb] rounded-xl text-xs shadow-2xs">
-                    <p className="text-slate-500 font-medium">Notes</p>
-                    <p className="font-semibold text-[#0d1f15] mt-0.5 text-sm">
-                      {selectedExpense.notes}
-                    </p>
-                  </div>
-                )}
+                    {selectedExpense.notes && (
+                      <div className="p-4 bg-white border border-[#d5dbcb] rounded-xl text-xs shadow-2xs">
+                        <p className="text-slate-500 font-medium">Notes</p>
+                        <p className="font-semibold text-[#0d1f15] mt-0.5 text-sm">
+                          {selectedExpense.notes}
+                        </p>
+                      </div>
+                    )}
 
-                {/* Line Items if available */}
-                {selectedExpense.items && selectedExpense.items.length > 0 && (
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-bold text-[#0d1f15]">
-                      Line Items Breakdown ({selectedExpense.items.length})
-                    </p>
-                    <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl divide-y divide-[#d5dbcb] text-xs shadow-2xs">
-                      {selectedExpense.items.map((item, idx) => (
-                        <div key={idx} className="py-2 flex items-center justify-between">
-                          <span className="font-medium text-[#0d1f15]">
-                            {item.name} {item.qty ? `x${item.qty}` : ''}
-                          </span>
-                          <span className="font-bold text-[#0d1f15]">
-                            ₹{item.price}
-                          </span>
+                    {/* Line Items if available */}
+                    {selectedExpense.items && selectedExpense.items.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-bold text-[#0d1f15]">
+                          Line Items Breakdown ({selectedExpense.items.length})
+                        </p>
+                        <div className="p-3 bg-white border border-[#d5dbcb] rounded-xl divide-y divide-[#d5dbcb] text-xs shadow-2xs">
+                          {selectedExpense.items.map((item, idx) => (
+                            <div key={idx} className="py-2 flex items-center justify-between">
+                              <span className="font-medium text-[#0d1f15]">
+                                {item.name} {item.qty ? `x${item.qty}` : ''}
+                              </span>
+                              <span className="font-bold text-[#0d1f15]">
+                                ₹{item.price}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                      </div>
+                    )}
 
-                {/* Receipt Image Preview */}
-                {selectedExpense.receiptImage && (
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-bold text-[#0d1f15]">
-                      Attached Receipt Image
-                    </p>
-                    <div className="rounded-2xl overflow-hidden border border-[#d5dbcb] max-h-72 shadow-xs bg-black">
-                      <img
-                        src={selectedExpense.receiptImage}
-                        alt="Receipt"
-                        className="w-full h-full object-contain max-h-72 mx-auto"
-                      />
-                    </div>
+                    {/* Receipt Image Preview */}
+                    {selectedExpense.receiptImage && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <p className="font-bold text-[#0d1f15]">
+                            Attached Receipt Image
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setEnlargedReceiptUrl(selectedExpense.receiptImage || null)}
+                            className="text-[#0a452b] hover:underline font-bold text-[11px] flex items-center gap-1"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            Open Full Photo
+                          </button>
+                        </div>
+                        <div
+                          onClick={() => setEnlargedReceiptUrl(selectedExpense.receiptImage || null)}
+                          className="relative group cursor-pointer rounded-2xl overflow-hidden border border-[#d5dbcb] max-h-72 shadow-xs bg-black flex items-center justify-center"
+                        >
+                          <img
+                            src={selectedExpense.receiptImage}
+                            alt="Receipt"
+                            className="w-full h-full object-contain max-h-72 mx-auto group-hover:scale-105 transition-transform duration-200"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-xs gap-2 backdrop-blur-xs">
+                            <Eye className="w-5 h-5 text-emerald-400" />
+                            <span>Click to inspect photo</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()
             )}
           </div>
 
@@ -594,6 +672,59 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Full-Screen Receipt Photo Lightbox Modal */}
+      {enlargedReceiptUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 animate-in fade-in duration-200 select-none"
+          onClick={() => setEnlargedReceiptUrl(null)}
+        >
+          {/* Top Bar */}
+          <div
+            className="w-full max-w-3xl flex items-center justify-between text-white z-10 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-emerald-400" />
+              <span className="font-bold text-sm">Receipt Image Preview</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={enlargedReceiptUrl}
+                download="expense-receipt.jpg"
+                className="px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Upload className="w-3.5 h-3.5 rotate-180" />
+                Download
+              </a>
+              <button
+                type="button"
+                onClick={() => setEnlargedReceiptUrl(null)}
+                className="p-2 bg-white/20 hover:bg-white/40 text-white rounded-full transition-colors shadow-sm"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Enlarged Center Image */}
+          <div
+            className="relative flex-1 w-full max-w-4xl flex items-center justify-center p-2 my-2 overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={enlargedReceiptUrl}
+              alt="Enlarged Receipt"
+              className="max-w-full max-h-[82vh] rounded-2xl object-contain shadow-2xl border border-white/10 bg-slate-950"
+            />
+          </div>
+
+          <p className="text-xs text-slate-400 z-10 pb-2">
+            Click anywhere outside or press Close to return
+          </p>
         </div>
       )}
     </div>
