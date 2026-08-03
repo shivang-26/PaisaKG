@@ -34,7 +34,9 @@ export async function POST(req: NextRequest) {
     const mimeTypeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
     const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
 
+    const todayISO = new Date().toISOString().slice(0, 10);
     const prompt = `You are a specialized receipt scanner OCR system. Extract all details from this receipt photo into structured JSON format.
+Today's date is ${todayISO}. Use this to accurately assign the year and month when scanning receipts. If the receipt date is from a previous month (e.g. last month), extract that exact receipt date accurately in YYYY-MM-DD format.
 If a detail is uncertain, provide your best estimation and reflect low confidence in confidenceScore (0 to 100).
 Ensure category matches one of: Groceries, Food, Fuel, Medical, Shopping, Utilities, Education, Travel, Entertainment, Others.
 Date must be in YYYY-MM-DD format. Total amount must be a number.`;

@@ -35,7 +35,7 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   initialMode = 'camera',
   onClose,
 }) => {
-  const { currentUser, familyMembers, addExpense, getActiveGeminiApiKeyInfo, setActiveTab } = useApp();
+  const { currentUser, currentFamily, familyMembers, addExpense, getActiveGeminiApiKeyInfo, setActiveTab } = useApp();
 
   const [step, setStep] = useState<'camera' | 'gallery' | 'scanning' | 'review'>(initialMode);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -212,6 +212,10 @@ export const ScanReceiptModal: React.FC<ScanReceiptModalProps> = ({
   };
 
   const handleSaveExpense = async () => {
+    if (!currentFamily) {
+      setErrorMsg('No family workspace active. Please create or join a family first.');
+      return;
+    }
     if (!amount || Number(amount) <= 0) {
       setErrorMsg('Please enter a valid expense amount');
       return;

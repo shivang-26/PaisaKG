@@ -29,7 +29,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { currentUser, familyMembers, addExpense } = useApp();
+  const { currentUser, currentFamily, familyMembers, addExpense, setActiveTab } = useApp();
 
   const [amount, setAmount] = useState<number | ''>('');
   const [category, setCategory] = useState<ExpenseCategoryKey>('Groceries');
@@ -151,6 +151,25 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
       {/* Main Full-Page Form */}
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-xl mx-auto w-full space-y-4">
+          {!currentFamily && (
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 space-y-2">
+              <p className="text-xs font-bold">No Active Family Workspace</p>
+              <p className="text-[11px] text-amber-800">
+                You must create or join a family workspace before logging expenses.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setActiveTab('family');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-[#0a452b] text-white text-xs font-bold hover:bg-[#07331f] transition-all"
+              >
+                Go to Family Setup
+              </button>
+            </div>
+          )}
+
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />

@@ -98,7 +98,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   };
-  const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>('ALL');
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>(getCurrentMonthStr());
 
   const availableMonths = useMemo(() => {
     const monthMap = new Map<string, string>();
@@ -268,44 +268,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setFamilyMembers(familyData.members);
       setExpenses(familyData.expenses);
     } else {
-      // New account onboarding: Create their dedicated new family workspace
-      const newFamId = generateId('fam');
-      const newFamName = `${user.fullName}'s Family`;
-      const inviteCode = generateInviteCode();
-      const newFam: Family = {
-        id: newFamId,
-        name: newFamName,
-        inviteCode,
-        createdBy: user.id,
-        monthlyBudget: 75000,
-        currency: '₹',
-        createdAt: new Date().toISOString(),
-      };
-      await db.families.add(newFam);
-
-      // Save to cross-session shared backup store
-      try {
-        const existingBackup = JSON.parse(localStorage.getItem('paisa_shared_families_backup') || '[]');
-        existingBackup.push(newFam);
-        localStorage.setItem('paisa_shared_families_backup', JSON.stringify(existingBackup));
-      } catch (e) {
-        // silent fallback
-      }
-
-      const newMem: FamilyMember = {
-        id: generateId('mem'),
-        familyId: newFamId,
-        userId: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        role: 'Admin',
-        avatarUrl: user.avatarUrl,
-        joinedAt: new Date().toISOString(),
-      };
-      await db.family_members.add(newMem);
-
-      setCurrentFamily(newFam);
-      setFamilyMembers([newMem]);
+      // User has not created or joined any family workspace yet
+      setCurrentFamily(null);
+      setFamilyMembers([]);
       setExpenses([]);
     }
 

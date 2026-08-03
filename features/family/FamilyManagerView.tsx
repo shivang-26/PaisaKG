@@ -152,8 +152,8 @@ export const FamilyManagerView: React.FC = () => {
         </button>
       </div>
 
-      {/* Family Card Banner */}
-      {currentFamily && (
+      {/* Family Card Banner or No Family Setup Banner */}
+      {currentFamily ? (
         <div className="p-6 rounded-[24px] bg-[#f2f5e8] border border-[#d5dbcb] shadow-sm space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -211,6 +211,46 @@ export const FamilyManagerView: React.FC = () => {
                   <Copy className="w-3.5 h-3.5 text-white" /> Copy Code
                 </>
               )}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="p-6 rounded-[24px] bg-gradient-to-br from-[#f2f5e8] via-white to-[#e5e9d3] border-2 border-[#0a452b]/30 shadow-md space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-[#0a452b] text-emerald-300 flex items-center justify-center font-bold text-xl shadow-md">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-[#0d1f15]">
+                Setup Your Family Workspace
+              </h2>
+              <p className="text-xs text-slate-600 font-medium">
+                Create a new family to become Family Admin or join an existing family using invite code.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="p-4 rounded-2xl bg-[#0a452b] hover:bg-[#07331f] text-white text-left transition-all shadow-md group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Plus className="w-4 h-4" />
+              </div>
+              <p className="text-sm font-bold">Create New Family</p>
+              <p className="text-xs text-emerald-100/80">You will be assigned as Family Admin</p>
+            </button>
+
+            <button
+              onClick={() => setShowJoinModal(true)}
+              className="p-4 rounded-2xl bg-white hover:bg-[#f2f5e8] text-[#0d1f15] border border-[#d5dbcb] text-left transition-all shadow-sm group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Users className="w-4 h-4" />
+              </div>
+              <p className="text-sm font-bold text-[#0d1f15]">Join Family via Code</p>
+              <p className="text-xs text-slate-500">Enter invite code shared by family admin</p>
             </button>
           </div>
         </div>

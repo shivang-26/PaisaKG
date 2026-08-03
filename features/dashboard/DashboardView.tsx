@@ -51,13 +51,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     selectedMonthFilter,
   } = useApp();
 
-  // Filter expenses according to selectedMonthFilter
-  const currentMonthExpenses = expenses.filter((e) => {
-    if (selectedMonthFilter === 'ALL') return true;
-    return e.expenseDate.startsWith(selectedMonthFilter);
+  const getCurrentMonthStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  const activeBudgetMonth = selectedMonthFilter === 'ALL' ? getCurrentMonthStr() : selectedMonthFilter;
+
+  // Monthly budget calculation is strictly bound to the active target month
+  const budgetMonthExpenses = expenses.filter((e) => {
+    return e.expenseDate && e.expenseDate.startsWith(activeBudgetMonth);
   });
 
-  const totalMonthlySpent = currentMonthExpenses.reduce(
+  const totalMonthlySpent = budgetMonthExpenses.reduce(
     (sum, e) => sum + e.amount,
     0
   );
@@ -82,7 +88,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const dailyAllowance = Math.round(remainingBudget / daysLeft);
 
   // Category summary breakdown
-  const categoryTotals = currentMonthExpenses.reduce((acc, e) => {
+  const categoryTotals = budgetMonthExpenses.reduce((acc, e) => {
     acc[e.category] = (acc[e.category] || 0) + e.amount;
     return acc;
   }, {} as Record<string, number>);
@@ -223,7 +229,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               }`}>
                 {budgetPercentage}% of Budget
               </span>
-              <span className="text-[11px] text-slate-500 font-medium">{currentMonthExpenses.length} transactions</span>
+              <span className="text-[11px] text-slate-500 font-medium">{budgetMonthExpenses.length} transactions</span>
             </div>
           </div>
         </div>
